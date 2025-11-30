@@ -1,0 +1,1895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Webflow JSON Viewer & Health Score</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0f0f;
+      color: #e0e0e0;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+
+    .subtitle {
+      color: #888;
+      margin-bottom: 24px;
+    }
+
+    /* Paste Zone */
+    .paste-zone {
+      border: 2px dashed #333;
+      border-radius: 12px;
+      padding: 60px;
+      text-align: center;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .paste-zone:hover,
+    .paste-zone.active {
+      border-color: #4a9eff;
+      background: rgba(74, 158, 255, 0.05);
+    }
+
+    .paste-zone .icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+    }
+
+    .paste-zone h2 {
+      font-size: 20px;
+      color: #888;
+      margin-bottom: 8px;
+    }
+
+    .paste-zone p {
+      font-size: 14px;
+      color: #555;
+    }
+
+    .error {
+      margin-top: 16px;
+      padding: 12px 16px;
+      background: rgba(255, 80, 80, 0.1);
+      border-radius: 8px;
+      color: #ff6b6b;
+    }
+
+    /* Health Score Section */
+    .health-section {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+      border: 1px solid #2a2a4a;
+    }
+
+    .health-header {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .health-score-circle {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      flex-shrink: 0;
+    }
+
+    .health-score-circle svg {
+      transform: rotate(-90deg);
+    }
+
+    .health-score-circle .bg {
+      fill: none;
+      stroke: #2a2a4a;
+      stroke-width: 8;
+    }
+
+    .health-score-circle .progress {
+      fill: none;
+      stroke-width: 8;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.5s ease;
+    }
+
+    .health-score-circle .score-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .health-score-circle .score-value {
+      font-size: 32px;
+      font-weight: 700;
+    }
+
+    .health-score-circle .score-label {
+      font-size: 11px;
+      color: #888;
+      text-transform: uppercase;
+    }
+
+    .health-info {
+      flex: 1;
+      min-width: 250px;
+    }
+
+    .health-info h2 {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .health-info .grade {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+
+    .health-info .summary {
+      color: #aaa;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* Health Metrics Grid */
+    .health-metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .metric-card {
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 12px;
+      padding: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .metric-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .metric-title {
+      font-size: 13px;
+      color: #888;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .metric-score {
+      font-size: 14px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 12px;
+    }
+
+    .metric-score.good { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+    .metric-score.warning { background: rgba(251, 191, 36, 0.2); color: #fbbf24; }
+    .metric-score.bad { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+
+    .metric-bar {
+      height: 6px;
+      background: #2a2a4a;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .metric-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+
+    .metric-details {
+      font-size: 12px;
+      color: #666;
+      line-height: 1.6;
+    }
+
+    .metric-details ul {
+      list-style: none;
+      margin-top: 8px;
+    }
+
+    .metric-details li {
+      padding: 4px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .metric-details li::before {
+      content: "";
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #555;
+      flex-shrink: 0;
+    }
+
+    .metric-details li.issue::before { background: #ef4444; }
+    .metric-details li.good::before { background: #22c55e; }
+    .metric-details li.warning::before { background: #fbbf24; }
+
+    /* Issues List */
+    .issues-section {
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .issues-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .issues-header h3 {
+      font-size: 16px;
+      color: #fff;
+    }
+
+    .issues-toggle {
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: none;
+      border-radius: 6px;
+      color: #888;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .issues-toggle:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #e0e0e0;
+    }
+
+    .issues-list {
+      display: grid;
+      gap: 8px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .issue-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 8px;
+      font-size: 13px;
+    }
+
+    .issue-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    .issue-icon.critical { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+    .issue-icon.warning { background: rgba(251, 191, 36, 0.2); color: #fbbf24; }
+    .issue-icon.info { background: rgba(74, 158, 255, 0.2); color: #4a9eff; }
+
+    .issue-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .issue-title {
+      color: #e0e0e0;
+      margin-bottom: 2px;
+      word-break: break-word;
+    }
+
+    .issue-desc {
+      color: #666;
+      font-size: 12px;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: #1a1a1a;
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .stat-card .value {
+      font-size: 32px;
+      font-weight: 700;
+    }
+
+    .stat-card .label {
+      font-size: 13px;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    .stat-card.blue .value { color: #4a9eff; }
+    .stat-card.cyan .value { color: #00d4aa; }
+    .stat-card.purple .value { color: #a78bfa; }
+    .stat-card.yellow .value { color: #fbbf24; }
+
+    /* Element Types */
+    .element-types {
+      background: #1a1a1a;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .element-types h3 {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 12px;
+    }
+
+    .type-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .type-tag {
+      background: #252525;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+
+    .type-tag .name { color: #a78bfa; }
+    .type-tag .count { color: #666; margin-left: 4px; }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .tab {
+      padding: 10px 20px;
+      background: #1a1a1a;
+      border: none;
+      border-radius: 8px;
+      color: #888;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab:hover {
+      background: #252525;
+      color: #e0e0e0;
+    }
+
+    .tab.active {
+      background: #4a9eff;
+      color: #fff;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      margin-left: auto;
+    }
+
+    .btn {
+      padding: 10px 16px;
+      background: #252525;
+      border: none;
+      border-radius: 8px;
+      color: #888;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      background: #333;
+      color: #e0e0e0;
+    }
+
+    .btn.danger {
+      background: #4a1515;
+      color: #ff6b6b;
+    }
+
+    .btn.danger:hover {
+      background: #5a2020;
+    }
+
+    /* Search */
+    .search-input {
+      width: 100%;
+      padding: 12px 16px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: #e0e0e0;
+      font-size: 14px;
+      margin-bottom: 16px;
+      outline: none;
+    }
+
+    .search-input:focus {
+      border-color: #4a9eff;
+    }
+
+    .search-input::placeholder {
+      color: #555;
+    }
+
+    /* Content Panel */
+    .content-panel {
+      background: #1a1a1a;
+      border-radius: 12px;
+      padding: 20px;
+      max-height: 600px;
+      overflow: auto;
+    }
+
+    /* Tree View */
+    .tree-node {
+      padding: 4px 0;
+    }
+
+    .tree-node-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+      font-size: 13px;
+      flex-wrap: wrap;
+    }
+
+    .tree-node-header:hover {
+      background: #252525;
+    }
+
+    .tree-toggle {
+      width: 16px;
+      color: #555;
+      font-size: 10px;
+      flex-shrink: 0;
+    }
+
+    .tree-tag { color: #4a9eff; }
+    .tree-type { color: #a78bfa; font-size: 12px; }
+    .tree-name { color: #666; font-size: 12px; }
+    .tree-classes { color: #00d4aa; font-size: 11px; }
+
+    .tree-children {
+      margin-left: 20px;
+      padding-left: 12px;
+      border-left: 1px solid #252525;
+    }
+
+    /* Styles List */
+    .style-item {
+      padding: 16px 0;
+      border-bottom: 1px solid #252525;
+    }
+
+    .style-item:last-child {
+      border-bottom: none;
+    }
+
+    .style-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 6px;
+      flex-wrap: wrap;
+    }
+
+    .style-header:hover {
+      background: #252525;
+    }
+
+    .style-name {
+      color: #00d4aa;
+      font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+      font-size: 14px;
+      font-weight: 600;
+      word-break: break-all;
+    }
+
+    .style-badge {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(251, 191, 36, 0.2);
+      color: #fbbf24;
+      flex-shrink: 0;
+    }
+
+    .style-badge.framework {
+      background: rgba(34, 197, 94, 0.2);
+      color: #22c55e;
+    }
+
+    .style-badge.utility {
+      background: rgba(74, 158, 255, 0.2);
+      color: #4a9eff;
+    }
+
+    .style-badge.random {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+    }
+
+    .style-variants {
+      font-size: 11px;
+      color: #a78bfa;
+    }
+
+    .style-details {
+      margin-top: 12px;
+      padding-left: 24px;
+    }
+
+    .style-id {
+      font-size: 11px;
+      color: #555;
+      margin-bottom: 8px;
+      word-break: break-all;
+    }
+
+    .style-css {
+      background: #0f0f0f;
+      padding: 12px;
+      border-radius: 8px;
+      font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+      font-size: 12px;
+      color: #00d4aa;
+      white-space: pre-wrap;
+      line-height: 1.6;
+      word-break: break-word;
+    }
+
+    .variant-section {
+      margin-top: 12px;
+    }
+
+    .variant-label {
+      font-size: 11px;
+      color: #a78bfa;
+      margin-bottom: 6px;
+    }
+
+    .variant-name {
+      color: #fbbf24;
+      font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+      font-size: 12px;
+    }
+
+    /* Raw JSON */
+    .raw-json {
+      font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+      word-break: break-all;
+      color: #888;
+      line-height: 1.5;
+    }
+
+    /* Copy Script Section */
+    .copy-script {
+      background: #1a1a1a;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 24px;
+    }
+
+    .copy-script h3 {
+      font-size: 16px;
+      margin-bottom: 12px;
+    }
+
+    .copy-script p {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 12px;
+    }
+
+    .script-code {
+      background: #0f0f0f;
+      padding: 16px;
+      border-radius: 8px;
+      font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+      font-size: 12px;
+      color: #00d4aa;
+      overflow-x: auto;
+      position: relative;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      padding: 6px 12px;
+      background: #333;
+      border: none;
+      border-radius: 6px;
+      color: #888;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .copy-btn:hover {
+      background: #444;
+      color: #e0e0e0;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    /* Highlight */
+    .highlight {
+      background: rgba(251, 191, 36, 0.2);
+      border-radius: 4px;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #333;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #444;
+    }
+
+    /* Framework Detection */
+    .framework-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      border-radius: 8px;
+      font-size: 13px;
+      color: #22c55e;
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
+
+    .framework-badge.none {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: #ef4444;
+    }
+
+    .detected-frameworks {
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 12px;
+      }
+      
+      .health-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .tabs {
+        flex-direction: column;
+      }
+      
+      .toolbar {
+        margin-left: 0;
+        width: 100%;
+        justify-content: flex-end;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Webflow JSON Viewer & Health Score</h1>
+    <p class="subtitle">Copy an element from Webflow Designer, then paste here (Cmd+V / Ctrl+V)</p>
+
+    <!-- Paste Zone (shown when no data) -->
+    <div id="pasteZone" class="paste-zone">
+      <div class="icon">📋</div>
+      <h2>Paste Webflow JSON here</h2>
+      <p>Use the console script below to copy from Webflow first</p>
+      <div id="errorMsg" class="error hidden"></div>
+    </div>
+
+    <!-- Main Content (shown when data exists) -->
+    <div id="mainContent" class="hidden">
+      
+      <!-- Health Score Section -->
+      <div class="health-section" id="healthSection"></div>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card blue">
+          <div class="value" id="statElements">0</div>
+          <div class="label">Elements</div>
+        </div>
+        <div class="stat-card cyan">
+          <div class="value" id="statClasses">0</div>
+          <div class="label">Classes</div>
+        </div>
+        <div class="stat-card purple">
+          <div class="value" id="statInteractions">0</div>
+          <div class="label">Interactions</div>
+        </div>
+        <div class="stat-card yellow">
+          <div class="value" id="statSymbols">0</div>
+          <div class="label">Unlinked Symbols</div>
+        </div>
+      </div>
+
+      <!-- Element Types -->
+      <div class="element-types">
+        <h3>Element Types</h3>
+        <div class="type-tags" id="typeTags"></div>
+      </div>
+
+      <!-- Tabs & Toolbar -->
+      <div class="tabs">
+        <button class="tab active" data-tab="tree">Element Tree</button>
+        <button class="tab" data-tab="styles">Styles <span id="stylesCount"></span></button>
+        <button class="tab" data-tab="raw">Raw JSON</button>
+        <div class="toolbar">
+          <button class="btn" id="expandAllBtn">Expand All</button>
+          <button class="btn" id="collapseAllBtn">Collapse All</button>
+          <button class="btn danger" id="clearBtn">Clear</button>
+        </div>
+      </div>
+
+      <!-- Search -->
+      <input type="text" class="search-input" id="searchInput" placeholder="Search elements or classes...">
+
+      <!-- Content Panel -->
+      <div class="content-panel">
+        <div id="treeContent"></div>
+        <div id="stylesContent" class="hidden"></div>
+        <div id="rawContent" class="hidden"></div>
+      </div>
+    </div>
+
+    <!-- Copy Script Section -->
+    <div class="copy-script">
+      <h3>📝 How to copy from Webflow</h3>
+      <p>Paste this script in the browser console while in Webflow Designer, then copy any element:</p>
+      <div class="script-code">
+        <button class="copy-btn" id="copyScriptBtn">Copy</button>
+        <code>document.addEventListener('copy', ({ clipboardData }) => {
+  const webflowData = clipboardData.getData('application/json');
+  const type = 'text/plain';
+  const blob = new Blob([webflowData], { type });
+  const data = [new ClipboardItem({ [type]: blob })];
+  navigator.clipboard.write(data);
+  console.log('Copied! Paste into the viewer.');
+});</code>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // State
+    let jsonData = null;
+    let expandedNodes = new Set();
+    let activeTab = 'tree';
+    let searchTerm = '';
+    let healthAnalysis = null;
+    let showAllIssues = false;
+
+    // Framework detection patterns
+    const FRAMEWORK_PATTERNS = {
+      'MAST': {
+        patterns: ['page-wrapper', 'page-main', 'section', 'container', 'row', 'col', 'col-', 'slot', 'u-', 'cc-', 'heading-component', 'rich-text-component', 'eyebrow', 'btn', 'card'],
+        description: 'No-Code Supply Co. MAST Framework',
+        url: 'https://www.nocodesupply.co/mast'
+      },
+      'Client-First': {
+        patterns: ['page_', 'section_', 'container_', 'padding-', 'margin-', 'text-size-', 'heading-style-', 'button_', 'spacer-', '_component', '_wrapper', '_layout', 'global-styles', 'fs-'],
+        description: 'Finsweet Client-First',
+        url: 'https://www.finsweet.com/client-first'
+      },
+      'Lumos': {
+        patterns: ['l-section', 'l-container', 'l-grid', 'l-', 'lumos-'],
+        description: 'Lumos Framework',
+        url: ''
+      },
+      'Saddle': {
+        patterns: ['s-section', 's-container', 's-', 'saddle-', 'sdl-'],
+        description: 'Saddle Framework',
+        url: ''
+      },
+      'Relume': {
+        patterns: ['rl-section', 'rl-container', 'rl-', 'relume-', 'navbar_', 'footer_', 'layout_'],
+        description: 'Relume Library',
+        url: 'https://www.relume.io'
+      },
+      'Wizardry': {
+        patterns: ['wiz-', 'wizardry-', 'w-container', 'w-section', 'w-layout'],
+        description: 'Wizardry Framework',
+        url: ''
+      },
+      'Moxy': {
+        patterns: ['moxy-', 'mx-', 'moxy_'],
+        description: 'Moxy Framework',
+        url: ''
+      }
+    };
+
+    // Utility class patterns (good practice)
+    const UTILITY_PATTERNS = [
+      /^u-/, /^is-/, /^has-/, /^cc-/, /^mod-/, /^js-/,
+      /^text-/, /^bg-/, /^flex-/, /^grid-/,
+      /^m[tblrxy]?-/, /^p[tblrxy]?-/, /^gap-/,
+      /^w-/, /^h-/, /^max-/, /^min-/,
+      /^hidden/, /^visible/, /^opacity-/,
+      /^rounded/, /^shadow/, /^border-/,
+      /^overflow-/, /^z-/, /^cursor-/,
+      /^align-/, /^justify-/, /^self-/,
+      /^order-/, /^grow-/, /^shrink-/
+    ];
+
+    // Random class patterns (bad practice)
+    const RANDOM_CLASS_PATTERNS = [
+      /^div-block(-\d+)?$/i,
+      /^section(-\d+)?$/i,
+      /^container(-\d+)?$/i,
+      /^heading(-\d+)?$/i,
+      /^paragraph(-\d+)?$/i,
+      /^link(-\d+)?$/i,
+      /^image(-\d+)?$/i,
+      /^text-block(-\d+)?$/i,
+      /^block(-\d+)?$/i,
+      /^class(-\d+)?$/i,
+      /^new-class(-\d+)?$/i,
+      /^(.*)-copy(-\d+)?$/i,
+      /^(.*)-copy$/i,
+      /^_\w+$/,
+      /^[a-z]+-\d+$/i,
+      /^Div Block/i,
+      /^Section/i,
+      /^Container/i,
+      /^Heading/i,
+      /^Paragraph/i,
+      /^Link Block/i,
+      /^Image/i,
+      /^Text Block/i,
+      /^Grid/i,
+      /^Columns/i,
+      /^Column/i,
+    ];
+
+    // BEM pattern check
+    const BEM_PATTERN = /^[a-z]+(-[a-z]+)*(__[a-z]+(-[a-z]+)*)?(--[a-z]+(-[a-z]+)*)?$/i;
+
+    // DOM Elements
+    const pasteZone = document.getElementById('pasteZone');
+    const mainContent = document.getElementById('mainContent');
+    const errorMsg = document.getElementById('errorMsg');
+    const searchInput = document.getElementById('searchInput');
+    const treeContent = document.getElementById('treeContent');
+    const stylesContent = document.getElementById('stylesContent');
+    const rawContent = document.getElementById('rawContent');
+    const healthSection = document.getElementById('healthSection');
+
+    // Initialize
+    document.addEventListener('paste', handlePaste);
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+    });
+    document.getElementById('expandAllBtn').addEventListener('click', expandAll);
+    document.getElementById('collapseAllBtn').addEventListener('click', collapseAll);
+    document.getElementById('clearBtn').addEventListener('click', clearData);
+    searchInput.addEventListener('input', (e) => {
+      searchTerm = e.target.value.toLowerCase();
+      render();
+    });
+    document.getElementById('copyScriptBtn').addEventListener('click', () => {
+      const script = document.querySelector('.script-code code').textContent;
+      navigator.clipboard.writeText(script);
+      document.getElementById('copyScriptBtn').textContent = 'Copied!';
+      setTimeout(() => {
+        document.getElementById('copyScriptBtn').textContent = 'Copy';
+      }, 2000);
+    });
+
+    function handlePaste(e) {
+      const text = e.clipboardData.getData('text/plain') || e.clipboardData.getData('application/json');
+      if (!text) return;
+
+      try {
+        const parsed = JSON.parse(text);
+        if (parsed.type === '@webflow/XscpData') {
+          jsonData = parsed;
+          expandedNodes = new Set(['root']);
+          if (parsed.payload?.nodes) {
+            const rootNodes = findRootNodes(parsed.payload.nodes);
+            rootNodes.forEach(n => expandedNodes.add('node-' + n._id));
+          }
+          healthAnalysis = analyzeProjectHealth(parsed);
+          showError('');
+          render();
+        } else {
+          showError('Valid JSON but not Webflow format. Looking for type: @webflow/XscpData');
+        }
+      } catch (err) {
+        showError('Invalid JSON: ' + err.message);
+      }
+    }
+
+    function showError(msg) {
+      if (msg) {
+        errorMsg.textContent = msg;
+        errorMsg.classList.remove('hidden');
+      } else {
+        errorMsg.classList.add('hidden');
+      }
+    }
+
+    function findRootNodes(nodes) {
+      const childIds = new Set();
+      nodes.forEach(n => {
+        (n.children || []).forEach(id => childIds.add(id));
+      });
+      return nodes.filter(n => !childIds.has(n._id));
+    }
+
+    // ========== HEALTH ANALYSIS ==========
+
+    function analyzeProjectHealth(data) {
+      const styles = data.payload?.styles || [];
+      const nodes = data.payload?.nodes || [];
+      
+      const analysis = {
+        score: 0,
+        grade: 'F',
+        summary: '',
+        frameworks: [],
+        metrics: {
+          namingConvention: { score: 0, max: 25, details: [] },
+          classReuse: { score: 0, max: 20, details: [] },
+          comboClasses: { score: 0, max: 20, details: [] },
+          cssVariables: { score: 0, max: 15, details: [] },
+          structure: { score: 0, max: 20, details: [] }
+        },
+        issues: [],
+        classBreakdown: {
+          framework: [],
+          utility: [],
+          semantic: [],
+          random: [],
+          combo: []
+        }
+      };
+
+      // Detect frameworks
+      analysis.frameworks = detectFrameworks(styles);
+
+      // Analyze class naming
+      analyzeNaming(styles, analysis);
+
+      // Analyze class reuse
+      analyzeReuse(styles, nodes, analysis);
+
+      // Analyze combo classes
+      analyzeComboClasses(styles, analysis);
+
+      // Analyze CSS variables usage
+      analyzeVariables(styles, analysis);
+
+      // Analyze structure
+      analyzeStructure(nodes, styles, analysis);
+
+      // Calculate total score
+      let totalScore = 0;
+      let maxScore = 0;
+      Object.values(analysis.metrics).forEach(m => {
+        totalScore += m.score;
+        maxScore += m.max;
+      });
+      
+      analysis.score = Math.round((totalScore / maxScore) * 100);
+      analysis.grade = getGrade(analysis.score);
+      analysis.summary = getSummary(analysis);
+
+      return analysis;
+    }
+
+    function detectFrameworks(styles) {
+      const detected = [];
+      const classNames = styles.map(s => (s.name || '').toLowerCase());
+
+      Object.entries(FRAMEWORK_PATTERNS).forEach(([name, config]) => {
+        let matchCount = 0;
+        let matchedPatterns = [];
+        
+        config.patterns.forEach(pattern => {
+          const patternLower = pattern.toLowerCase();
+          const matches = classNames.filter(cn => {
+            // Check if pattern is at start or matches exactly
+            return cn.startsWith(patternLower) || cn.includes(patternLower);
+          });
+          if (matches.length > 0) {
+            matchCount += matches.length;
+            matchedPatterns.push(pattern);
+          }
+        });
+        
+        // Require at least 3 pattern matches and 5 total class matches
+        if (matchedPatterns.length >= 2 && matchCount >= 4) {
+          detected.push({
+            name,
+            description: config.description,
+            url: config.url,
+            matchCount,
+            matchedPatterns: matchedPatterns.slice(0, 5)
+          });
+        }
+      });
+
+      return detected.sort((a, b) => b.matchCount - a.matchCount);
+    }
+
+    function analyzeNaming(styles, analysis) {
+      let frameworkCount = 0;
+      let utilityCount = 0;
+      let semanticCount = 0;
+      let randomCount = 0;
+      let bemCount = 0;
+
+      const randomClasses = [];
+
+      styles.forEach(style => {
+        const name = style.name || '';
+        if (!name) return;
+        
+        const category = categorizeClassName(name, analysis.frameworks);
+        
+        switch (category) {
+          case 'framework':
+            frameworkCount++;
+            analysis.classBreakdown.framework.push(name);
+            break;
+          case 'utility':
+            utilityCount++;
+            analysis.classBreakdown.utility.push(name);
+            break;
+          case 'random':
+            randomCount++;
+            analysis.classBreakdown.random.push(name);
+            randomClasses.push(name);
+            break;
+          default:
+            if (BEM_PATTERN.test(name)) {
+              bemCount++;
+            }
+            semanticCount++;
+            analysis.classBreakdown.semantic.push(name);
+        }
+      });
+
+      // Add issues for random classes (limit to first 10)
+      randomClasses.slice(0, 10).forEach(name => {
+        analysis.issues.push({
+          type: 'warning',
+          title: `Random class: .${name}`,
+          desc: 'Rename with semantic meaning or framework convention'
+        });
+      });
+
+      if (randomClasses.length > 10) {
+        analysis.issues.push({
+          type: 'warning',
+          title: `+${randomClasses.length - 10} more random classes`,
+          desc: 'Consider batch renaming these classes'
+        });
+      }
+
+      const total = styles.length || 1;
+      const goodRatio = (frameworkCount + utilityCount + semanticCount - randomCount) / total;
+      const randomRatio = randomCount / total;
+
+      // Score: penalize heavily for random classes
+      let namingScore = 25;
+      namingScore -= Math.min(15, randomRatio * 30); // Up to -15 for random classes
+      if (frameworkCount > 5) namingScore += 3; // Bonus for framework usage
+      if (utilityCount > 3) namingScore += 2; // Bonus for utility classes
+      
+      analysis.metrics.namingConvention.score = Math.max(0, Math.round(namingScore));
+      analysis.metrics.namingConvention.details = [
+        { text: `${frameworkCount} framework classes`, type: frameworkCount > 0 ? 'good' : 'info' },
+        { text: `${utilityCount} utility classes`, type: utilityCount > 0 ? 'good' : 'info' },
+        { text: `${semanticCount} semantic classes${bemCount > 0 ? ` (${bemCount} BEM)` : ''}`, type: 'info' },
+        { text: `${randomCount} random/default classes`, type: randomCount > 5 ? 'issue' : randomCount > 0 ? 'warning' : 'good' }
+      ];
+
+      if (randomCount > 10) {
+        analysis.issues.unshift({
+          type: 'critical',
+          title: `${randomCount} classes with poor naming`,
+          desc: 'Many classes use default Webflow names. Rename them for maintainability.'
+        });
+      }
+    }
+
+    function categorizeClassName(name, detectedFrameworks) {
+      // Check if it matches detected framework patterns first
+      for (const fw of detectedFrameworks) {
+        const config = FRAMEWORK_PATTERNS[fw.name];
+        if (config) {
+          for (const pattern of config.patterns) {
+            if (name.toLowerCase().includes(pattern.toLowerCase())) {
+              return 'framework';
+            }
+          }
+        }
+      }
+
+      // Check other framework patterns
+      for (const [fwName, config] of Object.entries(FRAMEWORK_PATTERNS)) {
+        for (const pattern of config.patterns) {
+          if (name.toLowerCase().startsWith(pattern.toLowerCase())) {
+            return 'framework';
+          }
+        }
+      }
+
+      // Check utility patterns
+      if (UTILITY_PATTERNS.some(p => p.test(name))) {
+        return 'utility';
+      }
+
+      // Check random patterns
+      if (RANDOM_CLASS_PATTERNS.some(p => p.test(name))) {
+        return 'random';
+      }
+
+      return 'semantic';
+    }
+
+    function analyzeReuse(styles, nodes, analysis) {
+      const classUsage = {};
+      
+      nodes.forEach(node => {
+        (node.classes || []).forEach(classId => {
+          classUsage[classId] = (classUsage[classId] || 0) + 1;
+        });
+      });
+
+      const totalClasses = styles.length || 1;
+      let reusedClasses = 0;
+      let singleUseClasses = 0;
+      let unusedClasses = 0;
+      const singleUseList = [];
+
+      styles.forEach(style => {
+        const usage = classUsage[style._id] || 0;
+        if (usage > 1) {
+          reusedClasses++;
+        } else if (usage === 1) {
+          singleUseClasses++;
+          if (!style.comb && style.name) {
+            singleUseList.push(style.name);
+          }
+        } else {
+          unusedClasses++;
+        }
+      });
+
+      // Add some single-use issues (limit to 5)
+      singleUseList.slice(0, 5).forEach(name => {
+        analysis.issues.push({
+          type: 'info',
+          title: `Single-use: .${name}`,
+          desc: 'Could this class be reused elsewhere?'
+        });
+      });
+
+      const reuseRatio = reusedClasses / totalClasses;
+      let reuseScore = Math.round(reuseRatio * 25);
+      if (unusedClasses > 5) reuseScore -= 3;
+      
+      analysis.metrics.classReuse.score = Math.max(0, Math.min(20, reuseScore));
+      analysis.metrics.classReuse.details = [
+        { text: `${reusedClasses} classes used 2+ times`, type: reusedClasses > 5 ? 'good' : 'info' },
+        { text: `${singleUseClasses} classes used once`, type: singleUseClasses > totalClasses * 0.5 ? 'warning' : 'info' },
+        { text: `${unusedClasses} unused classes`, type: unusedClasses > 0 ? 'warning' : 'good' }
+      ];
+
+      if (singleUseClasses > totalClasses * 0.7) {
+        analysis.issues.push({
+          type: 'warning',
+          title: 'Low class reuse',
+          desc: `${Math.round(singleUseClasses/totalClasses*100)}% of classes used only once.`
+        });
+      }
+    }
+
+    function analyzeComboClasses(styles, analysis) {
+      const comboClasses = styles.filter(s => s.comb === '&');
+      const baseClasses = styles.filter(s => !s.comb);
+      
+      analysis.classBreakdown.combo = comboClasses.map(s => s.name);
+
+      const comboRatio = comboClasses.length / (styles.length || 1);
+      
+      // Good combo usage is between 15-45%
+      let comboScore = 0;
+      if (comboRatio >= 0.15 && comboRatio <= 0.45) {
+        comboScore = 20;
+      } else if (comboRatio < 0.15) {
+        comboScore = Math.round(comboRatio / 0.15 * 15);
+      } else {
+        comboScore = Math.round(Math.max(0, 20 - (comboRatio - 0.45) * 40));
+      }
+
+      analysis.metrics.comboClasses.score = Math.max(0, Math.min(20, comboScore));
+      analysis.metrics.comboClasses.details = [
+        { text: `${comboClasses.length} combo classes`, type: comboClasses.length > 0 ? 'good' : 'info' },
+        { text: `${baseClasses.length} base classes`, type: 'info' },
+        { text: `${Math.round(comboRatio * 100)}% combo ratio`, type: comboRatio >= 0.1 && comboRatio < 0.5 ? 'good' : 'warning' }
+      ];
+
+      if (comboRatio < 0.05 && styles.length > 10) {
+        analysis.issues.push({
+          type: 'info',
+          title: 'Low combo class usage',
+          desc: 'Use combo classes for variations (e.g., .btn.is-primary)'
+        });
+      }
+
+      if (comboRatio > 0.6) {
+        analysis.issues.push({
+          type: 'warning',
+          title: 'Excessive combo classes',
+          desc: 'Too many combos may indicate over-specificity.'
+        });
+      }
+    }
+
+    function analyzeVariables(styles, analysis) {
+      let varCount = 0;
+      let hardcodedColors = 0;
+      let hardcodedSizes = 0;
+
+      const colorRegex = /#[0-9a-fA-F]{3,8}|rgba?\s*\([^)]+\)|hsla?\s*\([^)]+\)/gi;
+      const sizeRegex = /:\s*\d+px/g;
+      const varRegex = /var\s*\(\s*--[^)]+\)/gi;
+
+      styles.forEach(style => {
+        const css = style.styleLess || '';
+        
+        const vars = css.match(varRegex) || [];
+        varCount += vars.length;
+
+        // Don't count colors that are inside var() references
+        const cssWithoutVars = css.replace(varRegex, '');
+        const colors = cssWithoutVars.match(colorRegex) || [];
+        hardcodedColors += colors.length;
+
+        const sizes = cssWithoutVars.match(sizeRegex) || [];
+        hardcodedSizes += sizes.length;
+      });
+
+      const total = varCount + hardcodedColors + hardcodedSizes || 1;
+      const varRatio = varCount / total;
+
+      let varScore = 0;
+      if (varCount > 10) varScore += 8;
+      else if (varCount > 5) varScore += 5;
+      else if (varCount > 0) varScore += 2;
+      
+      if (hardcodedColors < 5) varScore += 4;
+      else if (hardcodedColors < 15) varScore += 2;
+      
+      if (varRatio > 0.3) varScore += 3;
+
+      analysis.metrics.cssVariables.score = Math.min(15, varScore);
+      analysis.metrics.cssVariables.details = [
+        { text: `${varCount} CSS variable references`, type: varCount > 5 ? 'good' : varCount > 0 ? 'info' : 'warning' },
+        { text: `${hardcodedColors} hardcoded colors`, type: hardcodedColors > 15 ? 'issue' : hardcodedColors > 5 ? 'warning' : 'good' },
+        { text: `${hardcodedSizes} hardcoded px sizes`, type: hardcodedSizes > 30 ? 'warning' : 'info' }
+      ];
+
+      if (varCount === 0 && styles.length > 5) {
+        analysis.issues.push({
+          type: 'critical',
+          title: 'No CSS variables detected',
+          desc: 'Use Webflow variables for colors, spacing, typography.'
+        });
+      }
+
+      if (hardcodedColors > 20) {
+        analysis.issues.push({
+          type: 'warning',
+          title: `${hardcodedColors} hardcoded colors`,
+          desc: 'Use Webflow color variables for consistency.'
+        });
+      }
+    }
+
+    function analyzeStructure(nodes, styles, analysis) {
+      let score = 20;
+      const details = [];
+
+      // Check for deep nesting
+      const maxDepth = calculateMaxDepth(nodes);
+      if (maxDepth > 12) {
+        score -= 6;
+        details.push({ text: `Deep nesting: ${maxDepth} levels`, type: 'issue' });
+        analysis.issues.push({
+          type: 'warning',
+          title: `Deep nesting: ${maxDepth} levels`,
+          desc: 'Flatten structure for better performance.'
+        });
+      } else if (maxDepth > 8) {
+        score -= 2;
+        details.push({ text: `Nesting depth: ${maxDepth} levels`, type: 'warning' });
+      } else {
+        details.push({ text: `Nesting depth: ${maxDepth} levels`, type: 'good' });
+      }
+
+      // Check for div soup
+      const divCount = nodes.filter(n => n.tag === 'div' && n.type === 'Block').length;
+      const totalElements = nodes.length || 1;
+      const divRatio = divCount / totalElements;
+
+      if (divRatio > 0.85) {
+        score -= 5;
+        details.push({ text: `${Math.round(divRatio * 100)}% divs (div soup!)`, type: 'issue' });
+        analysis.issues.push({
+          type: 'warning',
+          title: 'Div soup detected',
+          desc: 'Use semantic HTML: section, article, nav, main, etc.'
+        });
+      } else if (divRatio > 0.7) {
+        score -= 2;
+        details.push({ text: `${Math.round(divRatio * 100)}% div elements`, type: 'warning' });
+      } else {
+        details.push({ text: `${Math.round(divRatio * 100)}% div elements`, type: 'good' });
+      }
+
+      // Check for semantic elements
+      const semanticTags = ['section', 'article', 'nav', 'header', 'footer', 'main', 'aside', 'figure'];
+      const semanticCount = nodes.filter(n => semanticTags.includes(n.tag)).length;
+      
+      if (semanticCount > 3) {
+        score += 2;
+        details.push({ text: `${semanticCount} semantic HTML elements`, type: 'good' });
+      } else if (semanticCount > 0) {
+        details.push({ text: `${semanticCount} semantic elements`, type: 'info' });
+      } else if (nodes.length > 10) {
+        score -= 2;
+        details.push({ text: 'No semantic HTML elements', type: 'warning' });
+      }
+
+      // Check for accessibility attributes
+      const accessibleNodes = nodes.filter(n => {
+        const xattrs = n.data?.xattr || [];
+        return xattrs.some(attr => 
+          attr.name?.startsWith('aria-') || 
+          attr.name === 'role' ||
+          attr.name === 'tabindex'
+        );
+      });
+
+      if (accessibleNodes.length > 0) {
+        details.push({ text: `${accessibleNodes.length} elements with ARIA`, type: 'good' });
+      }
+
+      // Check for links and buttons
+      const interactiveElements = nodes.filter(n => 
+        n.type === 'Link' || 
+        n.tag === 'button' || 
+        n.tag === 'a'
+      ).length;
+      
+      if (interactiveElements > 0) {
+        details.push({ text: `${interactiveElements} interactive elements`, type: 'info' });
+      }
+
+      analysis.metrics.structure.score = Math.max(0, Math.min(20, score));
+      analysis.metrics.structure.details = details;
+    }
+
+    function calculateMaxDepth(nodes) {
+      if (!nodes || nodes.length === 0) return 0;
+      
+      const nodeMap = {};
+      nodes.forEach(n => nodeMap[n._id] = n);
+      
+      const rootNodes = findRootNodes(nodes);
+      
+      function getDepth(node, current = 1) {
+        if (!node || !node.children || node.children.length === 0) return current;
+        
+        let maxChildDepth = current;
+        for (const childId of node.children) {
+          const child = nodeMap[childId];
+          if (child) {
+            const childDepth = getDepth(child, current + 1);
+            maxChildDepth = Math.max(maxChildDepth, childDepth);
+          }
+        }
+        return maxChildDepth;
+      }
+
+      if (rootNodes.length === 0) return 0;
+      return Math.max(...rootNodes.map(n => getDepth(n)));
+    }
+
+    function getGrade(score) {
+      if (score >= 90) return 'A+';
+      if (score >= 85) return 'A';
+      if (score >= 80) return 'B+';
+      if (score >= 75) return 'B';
+      if (score >= 70) return 'C+';
+      if (score >= 65) return 'C';
+      if (score >= 55) return 'D';
+      return 'F';
+    }
+
+    function getSummary(analysis) {
+      const { score, frameworks } = analysis;
+      const fwNote = frameworks.length > 0 
+        ? ` Using ${frameworks[0].name} framework.` 
+        : ' No framework detected.';
+      
+      if (score >= 90) {
+        return `Excellent! Well-structured and scalable.${fwNote}`;
+      } else if (score >= 80) {
+        return `Good structure with minor improvements possible.${fwNote}`;
+      } else if (score >= 70) {
+        return `Decent foundation, needs better organization.${fwNote}`;
+      } else if (score >= 60) {
+        return `Several areas need attention for scalability.${fwNote}`;
+      } else if (score >= 40) {
+        return `Significant issues. Consider adopting a framework.${fwNote}`;
+      } else {
+        return `Major restructuring needed for maintainability.${fwNote}`;
+      }
+    }
+
+    function getScoreColor(score) {
+      if (score >= 80) return '#22c55e';
+      if (score >= 60) return '#fbbf24';
+      return '#ef4444';
+    }
+
+    // ========== RENDER FUNCTIONS ==========
+
+    function render() {
+      if (!jsonData) {
+        pasteZone.classList.remove('hidden');
+        mainContent.classList.add('hidden');
+        return;
+      }
+
+      pasteZone.classList.add('hidden');
+      mainContent.classList.remove('hidden');
+
+      renderHealthScore();
+      renderStats();
+      renderElementTypes();
+      renderTree();
+      renderStyles();
+      renderRaw();
+    }
+
+    function renderHealthScore() {
+      if (!healthAnalysis) return;
+
+      const { score, grade, summary, frameworks, metrics, issues } = healthAnalysis;
+      const color = getScoreColor(score);
+      const circumference = 2 * Math.PI * 52;
+      const offset = circumference - (score / 100) * circumference;
+
+      let html = `
+        <div class="health-header">
+          <div class="health-score-circle">
+            <svg width="120" height="120">
+              <circle class="bg" cx="60" cy="60" r="52"></circle>
+              <circle class="progress" cx="60" cy="60" r="52" 
+                stroke="${color}" 
+                stroke-dasharray="${circumference}" 
+                stroke-dashoffset="${offset}">
+              </circle>
+            </svg>
+            <div class="score-text">
+              <div class="score-value" style="color: ${color}">${score}</div>
+              <div class="score-label">Health</div>
+            </div>
+          </div>
+          <div class="health-info">
+            <h2>Project Health Score</h2>
+            <span class="grade" style="background: ${color}20; color: ${color}">Grade: ${grade}</span>
+            <p class="summary">${summary}</p>
+          </div>
+        </div>
+
+        <div class="detected-frameworks">
+          ${frameworks.length > 0 
+            ? frameworks.map(f => `
+                <span class="framework-badge" title="${f.matchedPatterns?.join(', ') || ''}">
+                  ✓ ${f.name}
+                  <span style="opacity: 0.7; font-size: 11px;">(${f.matchCount} matches)</span>
+                </span>
+              `).join('')
+            : '<span class="framework-badge none">⚠ No framework detected</span>'
+          }
+        </div>
+
+        <div class="health-metrics">
+          ${Object.entries(metrics).map(([key, metric]) => {
+            const pct = Math.round((metric.score / metric.max) * 100);
+            const metricColor = pct >= 70 ? '#22c55e' : pct >= 40 ? '#fbbf24' : '#ef4444';
+            const titles = {
+              namingConvention: '📝 Naming Convention',
+              classReuse: '♻️ Class Reuse',
+              comboClasses: '🔗 Combo Classes',
+              cssVariables: '🎨 CSS Variables',
+              structure: '🏗️ Structure'
+            };
+            
+            return `
+              <div class="metric-card">
+                <div class="metric-header">
+                  <span class="metric-title">${titles[key] || key}</span>
+                  <span class="metric-score ${pct >= 70 ? 'good' : pct >= 40 ? 'warning' : 'bad'}">
+                    ${metric.score}/${metric.max}
+                  </span>
+                </div>
+                <div class="metric-bar">
+                  <div class="metric-bar-fill" style="width: ${pct}%; background: ${metricColor};"></div>
+                </div>
+                <div class="metric-details">
+                  <ul>
+                    ${metric.details.map(d => `<li class="${d.type || ''}">${d.text}</li>`).join('')}
+                  </ul>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+
+        ${issues.length > 0 ? `
+          <div class="issues-section">
+            <div class="issues-header">
+              <h3>⚠️ Issues Found (${issues.length})</h3>
+              ${issues.length > 5 ? `
+                <button class="issues-toggle" onclick="toggleIssues()">
+                  ${showAllIssues ? 'Show Less' : 'Show All'}
+                </button>
+              ` : ''}
+            </div>
+            <div class="issues-list">
+              ${(showAllIssues ? issues : issues.slice(0, 5)).map(issue => `
+                <div class="issue-item">
+                  <div class="issue-icon ${issue.type}">
+                    ${issue.type === 'critical' ? '!' : issue.type === 'warning' ? '⚠' : 'i'}
+                  </div>
+                  <div class="issue-content">
+                    <div class="issue-title">${escapeHtml(issue.title)}</div>
+                    <div class="issue-desc">${escapeHtml(issue.desc)}</div>
+                  </div>
+                </div>
+              `).join('')}
+              ${!showAllIssues && issues.length > 5 ? `
+                <div class="issue-item" style="opacity: 0.6; cursor: pointer;" onclick="toggleIssues()">
+                  <div class="issue-content">
+                    <div class="issue-title">+ ${issues.length - 5} more issues — click to expand</div>
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        ` : '<div style="margin-top: 16px; color: #22c55e;">✓ No major issues found</div>'}
+      `;
+
+      healthSection.innerHTML = html;
+    }
+
+    window.toggleIssues = function() {
+      showAllIssues = !showAllIssues;
+      renderHealthScore();
+    };
+
+    function renderStats() {
+      const { nodes, styles, ix2 } = jsonData.payload || {};
+      const meta = jsonData.meta || {};
+
+      document.getElementById('statElements').textContent = nodes?.length || 0;
+      document.getElementById('statClasses').textContent = styles?.length || 0;
+      document.getElementById('statInteractions').textContent = ix2?.interactions?.length || 0;
+      document.getElementById('statSymbols').textContent = meta.unlinkedSymbolCount || 0;
+      document.getElementById('stylesCount').textContent = `(${styles?.length || 0})`;
+    }
+
+    function renderElementTypes() {
+      const nodes = jsonData.payload?.nodes || [];
+      const types = {};
+      nodes.forEach(n => {
+        types[n.type] = (types[n.type] || 0) + 1;
+      });
+
+      const container = document.getElementById('typeTags');
+      container.innerHTML = Object.entries(types)
+        .sort((a, b) => b[1] - a[1])
+        .map(([type, count]) => `
+          <span class="type-tag">
+            <span class="name">${type}</span>
+            <span class="count">×${count}</span>
+          </span>
+        `).join('');
+    }
+
+    function getStyleName(styleId) {
+      const styles = jsonData.payload?.styles || [];
+      const style = styles.find(s => s._id === styleId);
+      return style?.name || styleId.substring(0, 8);
+    }
+
+    function getNodeName(node) {
+      return node.meta?.displayName || node.data?.displayName || '';
+    }
+
+    function getClassCategory(name) {
+      if (!healthAnalysis) return '';
+      const { classBreakdown } = healthAnalysis;
+      if (classBreakdown.framework.includes(name)) return 'framework';
+      if (classBreakdown.utility.includes(name)) return 'utility';
+      if (classBreakdown.random.includes(name)) return 'random';
+      if (classBreakdown.combo.includes(name)) return 'combo';
+      return '';
+    }
+
+    function renderTree() {
+      const nodes = jsonData.payload?.nodes || [];
+      const nodeMap = {};
+      nodes.forEach(n => nodeMap[n._id] = n);
+
+      const rootNodes = findRootNodes(nodes);
+
+      function renderNode(node, depth = 0) {
+        const id = 'node-' + node._id;
+        const isExpanded = expandedNodes.has(id);
+        const hasChildren = node.children?.length > 0;
+        const displayName = getNodeName(node);
+        const classNames = (node.classes || []).map(c => getStyleName(c));
+
+        const matchesSearch = searchTerm && (
+          node.type?.toLowerCase().includes(searchTerm) ||
+          node.tag?.toLowerCase().includes(searchTerm) ||
+          displayName?.toLowerCase().includes(searchTerm) ||
+          classNames.some(c => c.toLowerCase().includes(searchTerm))
+        );
+
+        let html = `
+          <div class="tree-node ${matchesSearch ? 'highlight' : ''}">
+            <div class="tree-node-header" data-node-id="${id}">
+              <span class="tree-toggle">${hasChildren ? (isExpanded ? '▼' : '▶') : ''}</span>
+              <span class="tree-tag">&lt;${node.tag || 'div'}&gt;</span>
+              <span class="tree-type">${node.type}</span>
+              ${displayName ? `<span class="tree-name">"${escapeHtml(displayName)}"</span>` : ''}
+              ${classNames.length > 0 ? `<span class="tree-classes">.${classNames.slice(0, 3).join(' .')}${classNames.length > 3 ? ' +' + (classNames.length - 3) : ''}</span>` : ''}
+            </div>
+        `;
+
+        if (isExpanded && hasChildren) {
+          html += '<div class="tree-children">';
+          node.children.forEach(childId => {
+            const child = nodeMap[childId];
+            if (child) html += renderNode(child, depth + 1);
+          });
+          html += '</div>';
+        }
+
+        html += '</div>';
+        return html;
+      }
+
+      treeContent.innerHTML = rootNodes.map(n => renderNode(n)).join('');
+
+      treeContent.querySelectorAll('.tree-node-header').forEach(el => {
+        el.addEventListener('click', () => {
+          const id = el.dataset.nodeId;
+          if (expandedNodes.has(id)) {
+            expandedNodes.delete(id);
+          } else {
+            expandedNodes.add(id);
+          }
+          renderTree();
+        });
+      });
+    }
+
+    function renderStyles() {
+      const styles = jsonData.payload?.styles || [];
+      
+      const filteredStyles = searchTerm
+        ? styles.filter(s => s.name?.toLowerCase().includes(searchTerm))
+        : styles;
+
+      stylesContent.innerHTML = filteredStyles.map(style => {
+        const id = 'style-' + style._id;
+        const isExpanded = expandedNodes.has(id);
+        const variantCount = style.variants ? Object.keys(style.variants).length : 0;
+        const category = getClassCategory(style.name);
+
+        let html = `
+          <div class="style-item">
+            <div class="style-header" data-style-id="${id}">
+              <span class="tree-toggle">${isExpanded ? '▼' : '▶'}</span>
+              <span class="style-name">.${escapeHtml(style.name || '(unnamed)')}</span>
+              ${style.comb === '&' ? '<span class="style-badge">combo</span>' : ''}
+              ${category === 'framework' ? '<span class="style-badge framework">framework</span>' : ''}
+              ${category === 'utility' ? '<span class="style-badge utility">utility</span>' : ''}
+              ${category === 'random' ? '<span class="style-badge random">random</span>' : ''}
+              ${variantCount > 0 ? `<span class="style-variants">${variantCount} variants</span>` : ''}
+            </div>
+        `;
+
+        if (isExpanded) {
+          const cssFormatted = style.styleLess
+            ? style.styleLess.split(';').filter(Boolean).map(s => s.trim()).join(';\n')
+            : '';
+
+          html += `
+            <div class="style-details">
+              <div class="style-id">ID: ${style._id}</div>
+              ${cssFormatted ? `<div class="style-css">${escapeHtml(cssFormatted)}</div>` : ''}
+          `;
+
+          if (variantCount > 0) {
+            html += '<div class="variant-section"><div class="variant-label">Variants:</div>';
+            Object.entries(style.variants).forEach(([name, data]) => {
+              const variantCss = data.styleLess
+                ? data.styleLess.split(';').filter(Boolean).map(s => s.trim()).join(';\n')
+                : '';
+              html += `
+                <div style="margin: 8px 0;">
+                  <span class="variant-name">${escapeHtml(name)}:</span>
+                  ${variantCss ? `<div class="style-css">${escapeHtml(variantCss)}</div>` : ''}
+                </div>
+              `;
+            });
+            html += '</div>';
+          }
+
+          html += '</div>';
+        }
+
+        html += '</div>';
+        return html;
+      }).join('');
+
+      stylesContent.querySelectorAll('.style-header').forEach(el => {
+        el.addEventListener('click', () => {
+          const id = el.dataset.styleId;
+          if (expandedNodes.has(id)) {
+            expandedNodes.delete(id);
+          } else {
+            expandedNodes.add(id);
+          }
+          renderStyles();
+        });
+      });
+    }
+
+    function renderRaw() {
+      rawContent.innerHTML = `<pre class="raw-json">${escapeHtml(JSON.stringify(jsonData, null, 2))}</pre>`;
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function switchTab(tab) {
+      activeTab = tab;
+      document.querySelectorAll('.tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.tab === tab);
+      });
+      treeContent.classList.toggle('hidden', tab !== 'tree');
+      stylesContent.classList.toggle('hidden', tab !== 'styles');
+      rawContent.classList.toggle('hidden', tab !== 'raw');
+    }
+
+    function expandAll() {
+      const nodes = jsonData.payload?.nodes || [];
+      const styles = jsonData.payload?.styles || [];
+      
+      nodes.forEach(n => expandedNodes.add('node-' + n._id));
+      styles.forEach(s => expandedNodes.add('style-' + s._id));
+      
+      render();
+    }
+
+    function collapseAll() {
+      expandedNodes = new Set(['root']);
+      render();
+    }
+
+    function clearData() {
+      jsonData = null;
+      healthAnalysis = null;
+      expandedNodes = new Set();
+      searchTerm = '';
+      showAllIssues = false;
+      searchInput.value = '';
+      render();
+    }
+  </script>
+</body>
+</html>
