@@ -5,12 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Webflow JSON Viewer & Health Score</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: #0f0f0f;
@@ -18,24 +13,9 @@
       min-height: 100vh;
       padding: 24px;
     }
-
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-
-    h1 {
-      font-size: 28px;
-      margin-bottom: 8px;
-      color: #fff;
-    }
-
-    .subtitle {
-      color: #888;
-      margin-bottom: 24px;
-    }
-
-    /* Paste Zone */
+    .container { max-width: 1400px; margin: 0 auto; }
+    h1 { font-size: 28px; margin-bottom: 8px; color: #fff; }
+    .subtitle { color: #888; margin-bottom: 24px; }
     .paste-zone {
       border: 2px dashed #333;
       border-radius: 12px;
@@ -44,29 +24,10 @@
       transition: all 0.2s;
       cursor: pointer;
     }
-
-    .paste-zone:hover,
-    .paste-zone.active {
-      border-color: #4a9eff;
-      background: rgba(74, 158, 255, 0.05);
-    }
-
-    .paste-zone .icon {
-      font-size: 64px;
-      margin-bottom: 16px;
-    }
-
-    .paste-zone h2 {
-      font-size: 20px;
-      color: #888;
-      margin-bottom: 8px;
-    }
-
-    .paste-zone p {
-      font-size: 14px;
-      color: #555;
-    }
-
+    .paste-zone:hover { border-color: #4a9eff; background: rgba(74, 158, 255, 0.05); }
+    .paste-zone .icon { font-size: 64px; margin-bottom: 16px; }
+    .paste-zone h2 { font-size: 20px; color: #888; margin-bottom: 8px; }
+    .paste-zone p { font-size: 14px; color: #555; }
     .error {
       margin-top: 16px;
       padding: 12px 16px;
@@ -74,8 +35,6 @@
       border-radius: 8px;
       color: #ff6b6b;
     }
-
-    /* Health Score Section */
     .health-section {
       background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
       border-radius: 16px;
@@ -83,7 +42,6 @@
       margin-bottom: 24px;
       border: 1px solid #2a2a4a;
     }
-
     .health-header {
       display: flex;
       align-items: center;
@@ -91,31 +49,20 @@
       margin-bottom: 24px;
       flex-wrap: wrap;
     }
-
     .health-score-circle {
       position: relative;
       width: 120px;
       height: 120px;
       flex-shrink: 0;
     }
-
-    .health-score-circle svg {
-      transform: rotate(-90deg);
-    }
-
-    .health-score-circle .bg {
-      fill: none;
-      stroke: #2a2a4a;
-      stroke-width: 8;
-    }
-
+    .health-score-circle svg { transform: rotate(-90deg); }
+    .health-score-circle .bg { fill: none; stroke: #2a2a4a; stroke-width: 8; }
     .health-score-circle .progress {
       fill: none;
       stroke-width: 8;
       stroke-linecap: round;
       transition: stroke-dashoffset 0.5s ease;
     }
-
     .health-score-circle .score-text {
       position: absolute;
       top: 50%;
@@ -123,28 +70,10 @@
       transform: translate(-50%, -50%);
       text-align: center;
     }
-
-    .health-score-circle .score-value {
-      font-size: 32px;
-      font-weight: 700;
-    }
-
-    .health-score-circle .score-label {
-      font-size: 11px;
-      color: #888;
-      text-transform: uppercase;
-    }
-
-    .health-info {
-      flex: 1;
-      min-width: 250px;
-    }
-
-    .health-info h2 {
-      font-size: 24px;
-      margin-bottom: 8px;
-    }
-
+    .health-score-circle .score-value { font-size: 32px; font-weight: 700; }
+    .health-score-circle .score-label { font-size: 11px; color: #888; text-transform: uppercase; }
+    .health-info { flex: 1; min-width: 250px; }
+    .health-info h2 { font-size: 24px; margin-bottom: 8px; }
     .health-info .grade {
       display: inline-block;
       padding: 4px 12px;
@@ -153,53 +82,34 @@
       font-size: 14px;
       margin-bottom: 12px;
     }
-
-    .health-info .summary {
-      color: #aaa;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
-    /* Health Metrics Grid */
+    .health-info .summary { color: #aaa; font-size: 14px; line-height: 1.5; }
     .health-metrics {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 16px;
     }
-
     .metric-card {
       background: rgba(255, 255, 255, 0.03);
       border-radius: 12px;
       padding: 16px;
       border: 1px solid rgba(255, 255, 255, 0.05);
     }
-
     .metric-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 12px;
     }
-
-    .metric-title {
-      font-size: 13px;
-      color: #888;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
+    .metric-title { font-size: 13px; color: #888; }
     .metric-score {
       font-size: 14px;
       font-weight: 600;
       padding: 4px 10px;
       border-radius: 12px;
     }
-
     .metric-score.good { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
     .metric-score.warning { background: rgba(251, 191, 36, 0.2); color: #fbbf24; }
     .metric-score.bad { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
-
     .metric-bar {
       height: 6px;
       background: #2a2a4a;
@@ -207,31 +117,10 @@
       overflow: hidden;
       margin-bottom: 12px;
     }
-
-    .metric-bar-fill {
-      height: 100%;
-      border-radius: 3px;
-      transition: width 0.5s ease;
-    }
-
-    .metric-details {
-      font-size: 12px;
-      color: #666;
-      line-height: 1.6;
-    }
-
-    .metric-details ul {
-      list-style: none;
-      margin-top: 8px;
-    }
-
-    .metric-details li {
-      padding: 4px 0;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
+    .metric-bar-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+    .metric-details { font-size: 12px; color: #666; line-height: 1.6; }
+    .metric-details ul { list-style: none; margin-top: 8px; }
+    .metric-details li { padding: 4px 0; display: flex; align-items: center; gap: 8px; }
     .metric-details li::before {
       content: "";
       width: 4px;
@@ -240,30 +129,21 @@
       background: #555;
       flex-shrink: 0;
     }
-
     .metric-details li.issue::before { background: #ef4444; }
     .metric-details li.good::before { background: #22c55e; }
     .metric-details li.warning::before { background: #fbbf24; }
-
-    /* Issues List */
     .issues-section {
       margin-top: 24px;
       padding-top: 24px;
       border-top: 1px solid rgba(255, 255, 255, 0.1);
     }
-
     .issues-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 16px;
     }
-
-    .issues-header h3 {
-      font-size: 16px;
-      color: #fff;
-    }
-
+    .issues-header h3 { font-size: 16px; color: #fff; }
     .issues-toggle {
       padding: 6px 12px;
       background: rgba(255, 255, 255, 0.05);
@@ -273,19 +153,8 @@
       font-size: 12px;
       cursor: pointer;
     }
-
-    .issues-toggle:hover {
-      background: rgba(255, 255, 255, 0.1);
-      color: #e0e0e0;
-    }
-
-    .issues-list {
-      display: grid;
-      gap: 8px;
-      max-height: 300px;
-      overflow-y: auto;
-    }
-
+    .issues-toggle:hover { background: rgba(255, 255, 255, 0.1); color: #e0e0e0; }
+    .issues-list { display: grid; gap: 8px; max-height: 300px; overflow-y: auto; }
     .issue-item {
       display: flex;
       align-items: center;
@@ -295,7 +164,6 @@
       border-radius: 8px;
       font-size: 13px;
     }
-
     .issue-icon {
       width: 24px;
       height: 24px;
@@ -306,95 +174,32 @@
       font-size: 12px;
       flex-shrink: 0;
     }
-
     .issue-icon.critical { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
     .issue-icon.warning { background: rgba(251, 191, 36, 0.2); color: #fbbf24; }
     .issue-icon.info { background: rgba(74, 158, 255, 0.2); color: #4a9eff; }
-
-    .issue-content {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .issue-title {
-      color: #e0e0e0;
-      margin-bottom: 2px;
-      word-break: break-word;
-    }
-
-    .issue-desc {
-      color: #666;
-      font-size: 12px;
-    }
-
-    /* Stats Grid */
+    .issue-content { flex: 1; min-width: 0; }
+    .issue-title { color: #e0e0e0; margin-bottom: 2px; word-break: break-word; }
+    .issue-desc { color: #666; font-size: 12px; }
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
       gap: 16px;
       margin-bottom: 24px;
     }
-
-    .stat-card {
-      background: #1a1a1a;
-      border-radius: 12px;
-      padding: 20px;
-    }
-
-    .stat-card .value {
-      font-size: 32px;
-      font-weight: 700;
-    }
-
-    .stat-card .label {
-      font-size: 13px;
-      color: #666;
-      margin-top: 4px;
-    }
-
+    .stat-card { background: #1a1a1a; border-radius: 12px; padding: 20px; }
+    .stat-card .value { font-size: 32px; font-weight: 700; }
+    .stat-card .label { font-size: 13px; color: #666; margin-top: 4px; }
     .stat-card.blue .value { color: #4a9eff; }
     .stat-card.cyan .value { color: #00d4aa; }
     .stat-card.purple .value { color: #a78bfa; }
     .stat-card.yellow .value { color: #fbbf24; }
-
-    /* Element Types */
-    .element-types {
-      background: #1a1a1a;
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 24px;
-    }
-
-    .element-types h3 {
-      font-size: 13px;
-      color: #666;
-      margin-bottom: 12px;
-    }
-
-    .type-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .type-tag {
-      background: #252525;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 13px;
-    }
-
+    .element-types { background: #1a1a1a; border-radius: 12px; padding: 20px; margin-bottom: 24px; }
+    .element-types h3 { font-size: 13px; color: #666; margin-bottom: 12px; }
+    .type-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .type-tag { background: #252525; padding: 6px 12px; border-radius: 6px; font-size: 13px; }
     .type-tag .name { color: #a78bfa; }
     .type-tag .count { color: #666; margin-left: 4px; }
-
-    /* Tabs */
-    .tabs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-    }
-
+    .tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
     .tab {
       padding: 10px 20px;
       background: #1a1a1a;
@@ -405,23 +210,9 @@
       cursor: pointer;
       transition: all 0.2s;
     }
-
-    .tab:hover {
-      background: #252525;
-      color: #e0e0e0;
-    }
-
-    .tab.active {
-      background: #4a9eff;
-      color: #fff;
-    }
-
-    .toolbar {
-      display: flex;
-      gap: 8px;
-      margin-left: auto;
-    }
-
+    .tab:hover { background: #252525; color: #e0e0e0; }
+    .tab.active { background: #4a9eff; color: #fff; }
+    .toolbar { display: flex; gap: 8px; margin-left: auto; }
     .btn {
       padding: 10px 16px;
       background: #252525;
@@ -432,22 +223,9 @@
       cursor: pointer;
       transition: all 0.2s;
     }
-
-    .btn:hover {
-      background: #333;
-      color: #e0e0e0;
-    }
-
-    .btn.danger {
-      background: #4a1515;
-      color: #ff6b6b;
-    }
-
-    .btn.danger:hover {
-      background: #5a2020;
-    }
-
-    /* Search */
+    .btn:hover { background: #333; color: #e0e0e0; }
+    .btn.danger { background: #4a1515; color: #ff6b6b; }
+    .btn.danger:hover { background: #5a2020; }
     .search-input {
       width: 100%;
       padding: 12px 16px;
@@ -459,16 +237,8 @@
       margin-bottom: 16px;
       outline: none;
     }
-
-    .search-input:focus {
-      border-color: #4a9eff;
-    }
-
-    .search-input::placeholder {
-      color: #555;
-    }
-
-    /* Content Panel */
+    .search-input:focus { border-color: #4a9eff; }
+    .search-input::placeholder { color: #555; }
     .content-panel {
       background: #1a1a1a;
       border-radius: 12px;
@@ -476,12 +246,7 @@
       max-height: 600px;
       overflow: auto;
     }
-
-    /* Tree View */
-    .tree-node {
-      padding: 4px 0;
-    }
-
+    .tree-node { padding: 4px 0; }
     .tree-node-header {
       display: flex;
       align-items: center;
@@ -493,39 +258,15 @@
       font-size: 13px;
       flex-wrap: wrap;
     }
-
-    .tree-node-header:hover {
-      background: #252525;
-    }
-
-    .tree-toggle {
-      width: 16px;
-      color: #555;
-      font-size: 10px;
-      flex-shrink: 0;
-    }
-
+    .tree-node-header:hover { background: #252525; }
+    .tree-toggle { width: 16px; color: #555; font-size: 10px; flex-shrink: 0; }
     .tree-tag { color: #4a9eff; }
     .tree-type { color: #a78bfa; font-size: 12px; }
     .tree-name { color: #666; font-size: 12px; }
     .tree-classes { color: #00d4aa; font-size: 11px; }
-
-    .tree-children {
-      margin-left: 20px;
-      padding-left: 12px;
-      border-left: 1px solid #252525;
-    }
-
-    /* Styles List */
-    .style-item {
-      padding: 16px 0;
-      border-bottom: 1px solid #252525;
-    }
-
-    .style-item:last-child {
-      border-bottom: none;
-    }
-
+    .tree-children { margin-left: 20px; padding-left: 12px; border-left: 1px solid #252525; }
+    .style-item { padding: 16px 0; border-bottom: 1px solid #252525; }
+    .style-item:last-child { border-bottom: none; }
     .style-header {
       display: flex;
       align-items: center;
@@ -535,11 +276,7 @@
       border-radius: 6px;
       flex-wrap: wrap;
     }
-
-    .style-header:hover {
-      background: #252525;
-    }
-
+    .style-header:hover { background: #252525; }
     .style-name {
       color: #00d4aa;
       font-family: 'SF Mono', Monaco, 'Courier New', monospace;
@@ -547,7 +284,6 @@
       font-weight: 600;
       word-break: break-all;
     }
-
     .style-badge {
       font-size: 10px;
       padding: 2px 6px;
@@ -556,39 +292,12 @@
       color: #fbbf24;
       flex-shrink: 0;
     }
-
-    .style-badge.framework {
-      background: rgba(34, 197, 94, 0.2);
-      color: #22c55e;
-    }
-
-    .style-badge.utility {
-      background: rgba(74, 158, 255, 0.2);
-      color: #4a9eff;
-    }
-
-    .style-badge.random {
-      background: rgba(239, 68, 68, 0.2);
-      color: #ef4444;
-    }
-
-    .style-variants {
-      font-size: 11px;
-      color: #a78bfa;
-    }
-
-    .style-details {
-      margin-top: 12px;
-      padding-left: 24px;
-    }
-
-    .style-id {
-      font-size: 11px;
-      color: #555;
-      margin-bottom: 8px;
-      word-break: break-all;
-    }
-
+    .style-badge.framework { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+    .style-badge.utility { background: rgba(74, 158, 255, 0.2); color: #4a9eff; }
+    .style-badge.random { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+    .style-variants { font-size: 11px; color: #a78bfa; }
+    .style-details { margin-top: 12px; padding-left: 24px; }
+    .style-id { font-size: 11px; color: #555; margin-bottom: 8px; word-break: break-all; }
     .style-css {
       background: #0f0f0f;
       padding: 12px;
@@ -600,24 +309,13 @@
       line-height: 1.6;
       word-break: break-word;
     }
-
-    .variant-section {
-      margin-top: 12px;
-    }
-
-    .variant-label {
-      font-size: 11px;
-      color: #a78bfa;
-      margin-bottom: 6px;
-    }
-
+    .variant-section { margin-top: 12px; }
+    .variant-label { font-size: 11px; color: #a78bfa; margin-bottom: 6px; }
     .variant-name {
       color: #fbbf24;
       font-family: 'SF Mono', Monaco, 'Courier New', monospace;
       font-size: 12px;
     }
-
-    /* Raw JSON */
     .raw-json {
       font-family: 'SF Mono', Monaco, 'Courier New', monospace;
       font-size: 12px;
@@ -626,26 +324,9 @@
       color: #888;
       line-height: 1.5;
     }
-
-    /* Copy Script Section */
-    .copy-script {
-      background: #1a1a1a;
-      border-radius: 12px;
-      padding: 20px;
-      margin-top: 24px;
-    }
-
-    .copy-script h3 {
-      font-size: 16px;
-      margin-bottom: 12px;
-    }
-
-    .copy-script p {
-      font-size: 13px;
-      color: #888;
-      margin-bottom: 12px;
-    }
-
+    .copy-script { background: #1a1a1a; border-radius: 12px; padding: 20px; margin-top: 24px; }
+    .copy-script h3 { font-size: 16px; margin-bottom: 12px; }
+    .copy-script p { font-size: 13px; color: #888; margin-bottom: 12px; }
     .script-code {
       background: #0f0f0f;
       padding: 16px;
@@ -656,7 +337,6 @@
       overflow-x: auto;
       position: relative;
     }
-
     .copy-btn {
       position: absolute;
       top: 8px;
@@ -669,42 +349,13 @@
       font-size: 12px;
       cursor: pointer;
     }
-
-    .copy-btn:hover {
-      background: #444;
-      color: #e0e0e0;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    /* Highlight */
-    .highlight {
-      background: rgba(251, 191, 36, 0.2);
-      border-radius: 4px;
-    }
-
-    /* Scrollbar */
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: #333;
-      border-radius: 4px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: #444;
-    }
-
-    /* Framework Detection */
+    .copy-btn:hover { background: #444; color: #e0e0e0; }
+    .hidden { display: none; }
+    .highlight { background: rgba(251, 191, 36, 0.2); border-radius: 4px; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #444; }
     .framework-badge {
       display: inline-flex;
       align-items: center;
@@ -718,36 +369,17 @@
       margin-right: 8px;
       margin-bottom: 8px;
     }
-
     .framework-badge.none {
       background: rgba(239, 68, 68, 0.1);
       border-color: rgba(239, 68, 68, 0.3);
       color: #ef4444;
     }
-
-    .detected-frameworks {
-      margin-bottom: 16px;
-    }
-
+    .detected-frameworks { margin-bottom: 16px; }
     @media (max-width: 600px) {
-      body {
-        padding: 12px;
-      }
-      
-      .health-header {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      
-      .tabs {
-        flex-direction: column;
-      }
-      
-      .toolbar {
-        margin-left: 0;
-        width: 100%;
-        justify-content: flex-end;
-      }
+      body { padding: 12px; }
+      .health-header { flex-direction: column; align-items: flex-start; }
+      .tabs { flex-direction: column; }
+      .toolbar { margin-left: 0; width: 100%; justify-content: flex-end; }
     }
   </style>
 </head>
@@ -756,7 +388,6 @@
     <h1>Webflow JSON Viewer & Health Score</h1>
     <p class="subtitle">Copy an element from Webflow Designer, then paste here (Cmd+V / Ctrl+V)</p>
 
-    <!-- Paste Zone (shown when no data) -->
     <div id="pasteZone" class="paste-zone">
       <div class="icon">📋</div>
       <h2>Paste Webflow JSON here</h2>
@@ -764,13 +395,9 @@
       <div id="errorMsg" class="error hidden"></div>
     </div>
 
-    <!-- Main Content (shown when data exists) -->
     <div id="mainContent" class="hidden">
-      
-      <!-- Health Score Section -->
       <div class="health-section" id="healthSection"></div>
 
-      <!-- Stats -->
       <div class="stats-grid">
         <div class="stat-card blue">
           <div class="value" id="statElements">0</div>
@@ -790,13 +417,11 @@
         </div>
       </div>
 
-      <!-- Element Types -->
       <div class="element-types">
         <h3>Element Types</h3>
         <div class="type-tags" id="typeTags"></div>
       </div>
 
-      <!-- Tabs & Toolbar -->
       <div class="tabs">
         <button class="tab active" data-tab="tree">Element Tree</button>
         <button class="tab" data-tab="styles">Styles <span id="stylesCount"></span></button>
@@ -808,10 +433,8 @@
         </div>
       </div>
 
-      <!-- Search -->
       <input type="text" class="search-input" id="searchInput" placeholder="Search elements or classes...">
 
-      <!-- Content Panel -->
       <div class="content-panel">
         <div id="treeContent"></div>
         <div id="stylesContent" class="hidden"></div>
@@ -819,7 +442,6 @@
       </div>
     </div>
 
-    <!-- Copy Script Section -->
     <div class="copy-script">
       <h3>📝 How to copy from Webflow</h3>
       <p>Paste this script in the browser console while in Webflow Designer, then copy any element:</p>
@@ -838,7 +460,6 @@
   </div>
 
   <script>
-    // State
     let jsonData = null;
     let expandedNodes = new Set();
     let activeTab = 'tree';
@@ -846,92 +467,96 @@
     let healthAnalysis = null;
     let showAllIssues = false;
 
-    // Framework detection patterns
+    // STRICT Framework patterns - must be very specific
     const FRAMEWORK_PATTERNS = {
       'MAST': {
-        patterns: ['page-wrapper', 'page-main', 'section', 'container', 'row', 'col', 'col-', 'slot', 'u-', 'cc-', 'heading-component', 'rich-text-component', 'eyebrow', 'btn', 'card'],
-        description: 'No-Code Supply Co. MAST Framework',
-        url: 'https://www.nocodesupply.co/mast'
+        patterns: ['page-wrapper', 'page-main', 'slot', 'u-d-flex', 'u-mb-', 'u-mt-', 'u-pt-', 'u-pb-', 'cc-', 'row-gap-', 'col-shrink', 'col-md-', 'col-lg-'],
+        required: ['page-wrapper', 'slot'], // Must have these
+        minMatches: 5,
+        description: 'No-Code Supply Co. MAST Framework'
       },
       'Client-First': {
-        patterns: ['page_', 'section_', 'container_', 'padding-', 'margin-', 'text-size-', 'heading-style-', 'button_', 'spacer-', '_component', '_wrapper', '_layout', 'global-styles', 'fs-'],
-        description: 'Finsweet Client-First',
-        url: 'https://www.finsweet.com/client-first'
-      },
-      'Lumos': {
-        patterns: ['l-section', 'l-container', 'l-grid', 'l-', 'lumos-'],
-        description: 'Lumos Framework',
-        url: ''
-      },
-      'Saddle': {
-        patterns: ['s-section', 's-container', 's-', 'saddle-', 'sdl-'],
-        description: 'Saddle Framework',
-        url: ''
+        patterns: ['page_', 'section_', 'padding-global', 'padding-section-', 'container-', 'margin-', 'text-size-', 'heading-style-', 'button_', 'spacer-', 'max-width-', 'fs-styleguide'],
+        required: ['page_', 'padding-global'],
+        minMatches: 5,
+        description: 'Finsweet Client-First'
       },
       'Relume': {
-        patterns: ['rl-section', 'rl-container', 'rl-', 'relume-', 'navbar_', 'footer_', 'layout_'],
-        description: 'Relume Library',
-        url: 'https://www.relume.io'
-      },
-      'Wizardry': {
-        patterns: ['wiz-', 'wizardry-', 'w-container', 'w-section', 'w-layout'],
-        description: 'Wizardry Framework',
-        url: ''
-      },
-      'Moxy': {
-        patterns: ['moxy-', 'mx-', 'moxy_'],
-        description: 'Moxy Framework',
-        url: ''
+        patterns: ['navbar_component', 'navbar_container', 'footer_component', 'section_', 'padding-vertical', 'padding-global', 'layout_component'],
+        required: [],
+        minMatches: 4,
+        description: 'Relume Library'
       }
     };
 
-    // Utility class patterns (good practice)
+    // Utility patterns (good)
     const UTILITY_PATTERNS = [
-      /^u-/, /^is-/, /^has-/, /^cc-/, /^mod-/, /^js-/,
-      /^text-/, /^bg-/, /^flex-/, /^grid-/,
-      /^m[tblrxy]?-/, /^p[tblrxy]?-/, /^gap-/,
-      /^w-/, /^h-/, /^max-/, /^min-/,
-      /^hidden/, /^visible/, /^opacity-/,
-      /^rounded/, /^shadow/, /^border-/,
-      /^overflow-/, /^z-/, /^cursor-/,
-      /^align-/, /^justify-/, /^self-/,
-      /^order-/, /^grow-/, /^shrink-/
+      /^u-[a-z]/, /^is-[a-z]/, /^has-[a-z]/, /^cc-[a-z]/, /^mod-[a-z]/, /^js-[a-z]/
     ];
 
-    // Random class patterns (bad practice)
-    const RANDOM_CLASS_PATTERNS = [
-      /^div-block(-\d+)?$/i,
-      /^section(-\d+)?$/i,
-      /^container(-\d+)?$/i,
-      /^heading(-\d+)?$/i,
-      /^paragraph(-\d+)?$/i,
-      /^link(-\d+)?$/i,
-      /^image(-\d+)?$/i,
-      /^text-block(-\d+)?$/i,
-      /^block(-\d+)?$/i,
-      /^class(-\d+)?$/i,
-      /^new-class(-\d+)?$/i,
-      /^(.*)-copy(-\d+)?$/i,
-      /^(.*)-copy$/i,
-      /^_\w+$/,
+    // EXPANDED Random/bad class patterns - Webflow defaults
+    const RANDOM_PATTERNS = [
+      // Exact Webflow defaults
+      /^div-block$/i, /^div-block-\d+$/i,
+      /^section$/i, /^section-\d+$/i,
+      /^container$/i, /^container-\d+$/i,
+      /^heading$/i, /^heading-\d+$/i,
+      /^paragraph$/i, /^paragraph-\d+$/i,
+      /^text-block$/i, /^text-block-\d+$/i,
+      /^link-block$/i, /^link-block-\d+$/i,
+      /^image$/i, /^image-\d+$/i,
+      /^button$/i, /^button-\d+$/i,
+      /^form-block$/i, /^form-block-\d+$/i,
+      /^text-field$/i, /^text-field-\d+$/i,
+      /^submit-button$/i, /^submit-button-\d+$/i,
+      /^columns$/i, /^columns-\d+$/i,
+      /^column$/i, /^column-\d+$/i,
+      /^grid$/i, /^grid-\d+$/i,
+      /^list$/i, /^list-\d+$/i,
+      /^list-item$/i, /^list-item-\d+$/i,
+      /^block$/i, /^block-\d+$/i,
+      /^wrapper$/i, /^wrapper-\d+$/i,
+      /^content$/i, /^content-\d+$/i,
+      /^html-embed$/i, /^html-embed-\d+$/i,
+      /^video$/i, /^video-\d+$/i,
+      /^background-video$/i,
+      /^lightbox-link$/i,
+      /^slider$/i, /^slide$/i, /^mask$/i,
+      /^tab-link$/i, /^tabs-content$/i, /^tabs-menu$/i,
+      /^dropdown$/i, /^dropdown-toggle$/i, /^dropdown-list$/i,
+      /^nav-link$/i, /^nav-menu$/i, /^navbar$/i,
+      /^brand$/i, /^menu-button$/i,
+      // Copy patterns
+      /^.+-copy$/i, /^.+-copy-\d+$/i,
+      /^copy-of-.+$/i,
+      // Numbered patterns (lazy naming)
       /^[a-z]+-\d+$/i,
-      /^Div Block/i,
-      /^Section/i,
-      /^Container/i,
-      /^Heading/i,
-      /^Paragraph/i,
-      /^Link Block/i,
-      /^Image/i,
-      /^Text Block/i,
-      /^Grid/i,
-      /^Columns/i,
-      /^Column/i,
+      /^_[a-z]+\d*$/i,
+      // Generic bad names
+      /^class$/i, /^class-\d+$/i,
+      /^new-class$/i, /^new-class-\d+$/i,
+      /^style$/i, /^style-\d+$/i,
+      /^box$/i, /^box-\d+$/i,
+      /^item$/i, /^item-\d+$/i,
+      /^element$/i, /^element-\d+$/i,
+      /^component$/i, /^component-\d+$/i,
+      /^module$/i, /^module-\d+$/i,
+      /^area$/i, /^area-\d+$/i,
+      /^holder$/i, /^holder-\d+$/i,
+      /^group$/i, /^group-\d+$/i,
+      /^inner$/i, /^outer$/i,
+      /^top$/i, /^bottom$/i, /^left$/i, /^right$/i,
+      /^main$/i, /^sub$/i,
+      /^big$/i, /^small$/i,
+      /^new$/i, /^old$/i,
+      /^test$/i, /^temp$/i, /^tmp$/i,
+      // Single letters or very short
+      /^[a-z]$/i, /^[a-z]{2}$/i
     ];
 
-    // BEM pattern check
-    const BEM_PATTERN = /^[a-z]+(-[a-z]+)*(__[a-z]+(-[a-z]+)*)?(--[a-z]+(-[a-z]+)*)?$/i;
+    // BEM pattern
+    const BEM_PATTERN = /^[a-z][a-z0-9]*(-[a-z0-9]+)*(__[a-z0-9]+(-[a-z0-9]+)*)?(--[a-z0-9]+(-[a-z0-9]+)*)?$/i;
 
-    // DOM Elements
     const pasteZone = document.getElementById('pasteZone');
     const mainContent = document.getElementById('mainContent');
     const errorMsg = document.getElementById('errorMsg');
@@ -941,7 +566,6 @@
     const rawContent = document.getElementById('rawContent');
     const healthSection = document.getElementById('healthSection');
 
-    // Initialize
     document.addEventListener('paste', handlePaste);
     document.querySelectorAll('.tab').forEach(tab => {
       tab.addEventListener('click', () => switchTab(tab.dataset.tab));
@@ -957,9 +581,7 @@
       const script = document.querySelector('.script-code code').textContent;
       navigator.clipboard.writeText(script);
       document.getElementById('copyScriptBtn').textContent = 'Copied!';
-      setTimeout(() => {
-        document.getElementById('copyScriptBtn').textContent = 'Copy';
-      }, 2000);
+      setTimeout(() => document.getElementById('copyScriptBtn').textContent = 'Copy', 2000);
     });
 
     function handlePaste(e) {
@@ -969,12 +591,19 @@
       try {
         const parsed = JSON.parse(text);
         if (parsed.type === '@webflow/XscpData') {
+          // Reset everything
           jsonData = parsed;
           expandedNodes = new Set(['root']);
+          showAllIssues = false;
+          searchTerm = '';
+          searchInput.value = '';
+          
           if (parsed.payload?.nodes) {
             const rootNodes = findRootNodes(parsed.payload.nodes);
             rootNodes.forEach(n => expandedNodes.add('node-' + n._id));
           }
+          
+          // Fresh analysis
           healthAnalysis = analyzeProjectHealth(parsed);
           showError('');
           render();
@@ -987,19 +616,13 @@
     }
 
     function showError(msg) {
-      if (msg) {
-        errorMsg.textContent = msg;
-        errorMsg.classList.remove('hidden');
-      } else {
-        errorMsg.classList.add('hidden');
-      }
+      errorMsg.textContent = msg;
+      errorMsg.classList.toggle('hidden', !msg);
     }
 
     function findRootNodes(nodes) {
       const childIds = new Set();
-      nodes.forEach(n => {
-        (n.children || []).forEach(id => childIds.add(id));
-      });
+      nodes.forEach(n => (n.children || []).forEach(id => childIds.add(id)));
       return nodes.filter(n => !childIds.has(n._id));
     }
 
@@ -1009,49 +632,33 @@
       const styles = data.payload?.styles || [];
       const nodes = data.payload?.nodes || [];
       
+      // Fresh analysis object
       const analysis = {
         score: 0,
         grade: 'F',
         summary: '',
         frameworks: [],
         metrics: {
-          namingConvention: { score: 0, max: 25, details: [] },
+          namingConvention: { score: 0, max: 30, details: [] },
           classReuse: { score: 0, max: 20, details: [] },
-          comboClasses: { score: 0, max: 20, details: [] },
+          comboClasses: { score: 0, max: 15, details: [] },
           cssVariables: { score: 0, max: 15, details: [] },
           structure: { score: 0, max: 20, details: [] }
         },
         issues: [],
-        classBreakdown: {
-          framework: [],
-          utility: [],
-          semantic: [],
-          random: [],
-          combo: []
-        }
+        classBreakdown: { framework: [], utility: [], semantic: [], random: [], combo: [] }
       };
 
-      // Detect frameworks
+      // Run all analysis
       analysis.frameworks = detectFrameworks(styles);
-
-      // Analyze class naming
       analyzeNaming(styles, analysis);
-
-      // Analyze class reuse
       analyzeReuse(styles, nodes, analysis);
-
-      // Analyze combo classes
       analyzeComboClasses(styles, analysis);
-
-      // Analyze CSS variables usage
       analyzeVariables(styles, analysis);
+      analyzeStructure(nodes, analysis);
 
-      // Analyze structure
-      analyzeStructure(nodes, styles, analysis);
-
-      // Calculate total score
-      let totalScore = 0;
-      let maxScore = 0;
+      // Calculate score
+      let totalScore = 0, maxScore = 0;
       Object.values(analysis.metrics).forEach(m => {
         totalScore += m.score;
         maxScore += m.max;
@@ -1060,6 +667,10 @@
       analysis.score = Math.round((totalScore / maxScore) * 100);
       analysis.grade = getGrade(analysis.score);
       analysis.summary = getSummary(analysis);
+
+      // Debug
+      console.log('Analysis:', analysis);
+      console.log('Random classes:', analysis.classBreakdown.random);
 
       return analysis;
     }
@@ -1071,25 +682,29 @@
       Object.entries(FRAMEWORK_PATTERNS).forEach(([name, config]) => {
         let matchCount = 0;
         let matchedPatterns = [];
+        let hasRequired = config.required.length === 0;
         
+        // Check required patterns
+        if (config.required.length > 0) {
+          hasRequired = config.required.every(req => 
+            classNames.some(cn => cn.includes(req.toLowerCase()))
+          );
+        }
+        
+        // Count pattern matches
         config.patterns.forEach(pattern => {
           const patternLower = pattern.toLowerCase();
-          const matches = classNames.filter(cn => {
-            // Check if pattern is at start or matches exactly
-            return cn.startsWith(patternLower) || cn.includes(patternLower);
-          });
+          const matches = classNames.filter(cn => cn.startsWith(patternLower) || cn === patternLower);
           if (matches.length > 0) {
             matchCount += matches.length;
             matchedPatterns.push(pattern);
           }
         });
         
-        // Require at least 3 pattern matches and 5 total class matches
-        if (matchedPatterns.length >= 2 && matchCount >= 4) {
+        if (hasRequired && matchCount >= config.minMatches) {
           detected.push({
             name,
             description: config.description,
-            url: config.url,
             matchCount,
             matchedPatterns: matchedPatterns.slice(0, 5)
           });
@@ -1099,433 +714,309 @@
       return detected.sort((a, b) => b.matchCount - a.matchCount);
     }
 
+    function isRandomClassName(name) {
+      if (!name) return false;
+      return RANDOM_PATTERNS.some(pattern => pattern.test(name));
+    }
+
+    function isUtilityClassName(name) {
+      if (!name) return false;
+      return UTILITY_PATTERNS.some(pattern => pattern.test(name));
+    }
+
+    function isFrameworkClassName(name, frameworks) {
+      if (!name) return false;
+      const nameLower = name.toLowerCase();
+      
+      for (const fw of frameworks) {
+        const config = FRAMEWORK_PATTERNS[fw.name];
+        if (config) {
+          for (const pattern of config.patterns) {
+            if (nameLower.startsWith(pattern.toLowerCase())) {
+              return true;
+            }
+          }
+        }
+      }
+      return false;
+    }
+
     function analyzeNaming(styles, analysis) {
       let frameworkCount = 0;
       let utilityCount = 0;
       let semanticCount = 0;
       let randomCount = 0;
-      let bemCount = 0;
-
-      const randomClasses = [];
 
       styles.forEach(style => {
         const name = style.name || '';
         if (!name) return;
         
-        const category = categorizeClassName(name, analysis.frameworks);
-        
-        switch (category) {
-          case 'framework':
-            frameworkCount++;
-            analysis.classBreakdown.framework.push(name);
-            break;
-          case 'utility':
-            utilityCount++;
-            analysis.classBreakdown.utility.push(name);
-            break;
-          case 'random':
-            randomCount++;
-            analysis.classBreakdown.random.push(name);
-            randomClasses.push(name);
-            break;
-          default:
-            if (BEM_PATTERN.test(name)) {
-              bemCount++;
-            }
-            semanticCount++;
-            analysis.classBreakdown.semantic.push(name);
+        // Check in order of priority
+        if (isRandomClassName(name)) {
+          randomCount++;
+          analysis.classBreakdown.random.push(name);
+        } else if (isFrameworkClassName(name, analysis.frameworks)) {
+          frameworkCount++;
+          analysis.classBreakdown.framework.push(name);
+        } else if (isUtilityClassName(name)) {
+          utilityCount++;
+          analysis.classBreakdown.utility.push(name);
+        } else {
+          semanticCount++;
+          analysis.classBreakdown.semantic.push(name);
         }
       });
 
-      // Add issues for random classes (limit to first 10)
-      randomClasses.slice(0, 10).forEach(name => {
+      // Add issues for random classes
+      const randomList = analysis.classBreakdown.random;
+      randomList.slice(0, 8).forEach(name => {
         analysis.issues.push({
           type: 'warning',
-          title: `Random class: .${name}`,
-          desc: 'Rename with semantic meaning or framework convention'
+          title: `Bad class name: .${name}`,
+          desc: 'Rename with semantic meaning'
         });
       });
-
-      if (randomClasses.length > 10) {
+      if (randomList.length > 8) {
         analysis.issues.push({
-          type: 'warning',
-          title: `+${randomClasses.length - 10} more random classes`,
-          desc: 'Consider batch renaming these classes'
+          type: 'critical',
+          title: `+${randomList.length - 8} more random class names`,
+          desc: 'Major cleanup needed'
         });
       }
 
       const total = styles.length || 1;
-      const goodRatio = (frameworkCount + utilityCount + semanticCount - randomCount) / total;
       const randomRatio = randomCount / total;
+      const frameworkRatio = frameworkCount / total;
 
-      // Score: penalize heavily for random classes
-      let namingScore = 25;
-      namingScore -= Math.min(15, randomRatio * 30); // Up to -15 for random classes
-      if (frameworkCount > 5) namingScore += 3; // Bonus for framework usage
-      if (utilityCount > 3) namingScore += 2; // Bonus for utility classes
+      // STRICT scoring for naming
+      let score = 30;
       
-      analysis.metrics.namingConvention.score = Math.max(0, Math.round(namingScore));
+      // Heavy penalty for random classes
+      if (randomRatio > 0.5) score -= 25;
+      else if (randomRatio > 0.3) score -= 20;
+      else if (randomRatio > 0.2) score -= 15;
+      else if (randomRatio > 0.1) score -= 10;
+      else if (randomRatio > 0.05) score -= 5;
+      
+      // Bonus for framework/utility usage
+      if (frameworkCount > 10) score += 3;
+      if (utilityCount > 5) score += 2;
+
+      analysis.metrics.namingConvention.score = Math.max(0, Math.min(30, score));
       analysis.metrics.namingConvention.details = [
         { text: `${frameworkCount} framework classes`, type: frameworkCount > 0 ? 'good' : 'info' },
         { text: `${utilityCount} utility classes`, type: utilityCount > 0 ? 'good' : 'info' },
-        { text: `${semanticCount} semantic classes${bemCount > 0 ? ` (${bemCount} BEM)` : ''}`, type: 'info' },
-        { text: `${randomCount} random/default classes`, type: randomCount > 5 ? 'issue' : randomCount > 0 ? 'warning' : 'good' }
+        { text: `${semanticCount} semantic classes`, type: 'info' },
+        { text: `${randomCount} random/bad names (${Math.round(randomRatio*100)}%)`, type: randomCount > 3 ? 'issue' : randomCount > 0 ? 'warning' : 'good' }
       ];
 
-      if (randomCount > 10) {
+      if (randomRatio > 0.3) {
         analysis.issues.unshift({
           type: 'critical',
-          title: `${randomCount} classes with poor naming`,
-          desc: 'Many classes use default Webflow names. Rename them for maintainability.'
+          title: `${Math.round(randomRatio*100)}% of classes have poor names`,
+          desc: 'This project needs significant class renaming for maintainability.'
         });
       }
     }
 
-    function categorizeClassName(name, detectedFrameworks) {
-      // Check if it matches detected framework patterns first
-      for (const fw of detectedFrameworks) {
-        const config = FRAMEWORK_PATTERNS[fw.name];
-        if (config) {
-          for (const pattern of config.patterns) {
-            if (name.toLowerCase().includes(pattern.toLowerCase())) {
-              return 'framework';
-            }
-          }
-        }
-      }
-
-      // Check other framework patterns
-      for (const [fwName, config] of Object.entries(FRAMEWORK_PATTERNS)) {
-        for (const pattern of config.patterns) {
-          if (name.toLowerCase().startsWith(pattern.toLowerCase())) {
-            return 'framework';
-          }
-        }
-      }
-
-      // Check utility patterns
-      if (UTILITY_PATTERNS.some(p => p.test(name))) {
-        return 'utility';
-      }
-
-      // Check random patterns
-      if (RANDOM_CLASS_PATTERNS.some(p => p.test(name))) {
-        return 'random';
-      }
-
-      return 'semantic';
-    }
-
     function analyzeReuse(styles, nodes, analysis) {
       const classUsage = {};
-      
       nodes.forEach(node => {
         (node.classes || []).forEach(classId => {
           classUsage[classId] = (classUsage[classId] || 0) + 1;
         });
       });
 
-      const totalClasses = styles.length || 1;
-      let reusedClasses = 0;
-      let singleUseClasses = 0;
-      let unusedClasses = 0;
-      const singleUseList = [];
+      const total = styles.length || 1;
+      let reused = 0, single = 0, unused = 0;
 
       styles.forEach(style => {
         const usage = classUsage[style._id] || 0;
-        if (usage > 1) {
-          reusedClasses++;
-        } else if (usage === 1) {
-          singleUseClasses++;
-          if (!style.comb && style.name) {
-            singleUseList.push(style.name);
-          }
-        } else {
-          unusedClasses++;
-        }
+        if (usage > 1) reused++;
+        else if (usage === 1) single++;
+        else unused++;
       });
 
-      // Add some single-use issues (limit to 5)
-      singleUseList.slice(0, 5).forEach(name => {
-        analysis.issues.push({
-          type: 'info',
-          title: `Single-use: .${name}`,
-          desc: 'Could this class be reused elsewhere?'
-        });
-      });
+      const reuseRatio = reused / total;
+      const singleRatio = single / total;
 
-      const reuseRatio = reusedClasses / totalClasses;
-      let reuseScore = Math.round(reuseRatio * 25);
-      if (unusedClasses > 5) reuseScore -= 3;
-      
-      analysis.metrics.classReuse.score = Math.max(0, Math.min(20, reuseScore));
+      let score = 20;
+      if (reuseRatio < 0.1) score -= 10;
+      else if (reuseRatio < 0.2) score -= 5;
+      if (singleRatio > 0.7) score -= 8;
+      else if (singleRatio > 0.5) score -= 4;
+      if (unused > 5) score -= 3;
+
+      analysis.metrics.classReuse.score = Math.max(0, Math.min(20, score));
       analysis.metrics.classReuse.details = [
-        { text: `${reusedClasses} classes used 2+ times`, type: reusedClasses > 5 ? 'good' : 'info' },
-        { text: `${singleUseClasses} classes used once`, type: singleUseClasses > totalClasses * 0.5 ? 'warning' : 'info' },
-        { text: `${unusedClasses} unused classes`, type: unusedClasses > 0 ? 'warning' : 'good' }
+        { text: `${reused} classes reused (${Math.round(reuseRatio*100)}%)`, type: reuseRatio > 0.2 ? 'good' : 'warning' },
+        { text: `${single} single-use classes`, type: singleRatio > 0.6 ? 'warning' : 'info' },
+        { text: `${unused} unused classes`, type: unused > 0 ? 'warning' : 'good' }
       ];
 
-      if (singleUseClasses > totalClasses * 0.7) {
+      if (reuseRatio < 0.15) {
         analysis.issues.push({
           type: 'warning',
           title: 'Low class reuse',
-          desc: `${Math.round(singleUseClasses/totalClasses*100)}% of classes used only once.`
+          desc: 'Most classes are only used once. Create reusable utilities.'
         });
       }
     }
 
     function analyzeComboClasses(styles, analysis) {
-      const comboClasses = styles.filter(s => s.comb === '&');
-      const baseClasses = styles.filter(s => !s.comb);
-      
-      analysis.classBreakdown.combo = comboClasses.map(s => s.name);
+      const combos = styles.filter(s => s.comb === '&').length;
+      const bases = styles.length - combos;
+      const ratio = combos / (styles.length || 1);
 
-      const comboRatio = comboClasses.length / (styles.length || 1);
-      
-      // Good combo usage is between 15-45%
-      let comboScore = 0;
-      if (comboRatio >= 0.15 && comboRatio <= 0.45) {
-        comboScore = 20;
-      } else if (comboRatio < 0.15) {
-        comboScore = Math.round(comboRatio / 0.15 * 15);
-      } else {
-        comboScore = Math.round(Math.max(0, 20 - (comboRatio - 0.45) * 40));
-      }
+      analysis.classBreakdown.combo = styles.filter(s => s.comb === '&').map(s => s.name);
 
-      analysis.metrics.comboClasses.score = Math.max(0, Math.min(20, comboScore));
+      let score = 15;
+      if (ratio < 0.05 && styles.length > 10) score -= 8;
+      else if (ratio < 0.1) score -= 4;
+      if (ratio > 0.6) score -= 5;
+
+      analysis.metrics.comboClasses.score = Math.max(0, Math.min(15, score));
       analysis.metrics.comboClasses.details = [
-        { text: `${comboClasses.length} combo classes`, type: comboClasses.length > 0 ? 'good' : 'info' },
-        { text: `${baseClasses.length} base classes`, type: 'info' },
-        { text: `${Math.round(comboRatio * 100)}% combo ratio`, type: comboRatio >= 0.1 && comboRatio < 0.5 ? 'good' : 'warning' }
+        { text: `${combos} combo classes`, type: combos > 0 ? 'good' : 'warning' },
+        { text: `${bases} base classes`, type: 'info' },
+        { text: `${Math.round(ratio*100)}% combo ratio`, type: ratio >= 0.1 && ratio < 0.5 ? 'good' : 'warning' }
       ];
 
-      if (comboRatio < 0.05 && styles.length > 10) {
+      if (ratio < 0.05 && styles.length > 15) {
         analysis.issues.push({
           type: 'info',
-          title: 'Low combo class usage',
-          desc: 'Use combo classes for variations (e.g., .btn.is-primary)'
-        });
-      }
-
-      if (comboRatio > 0.6) {
-        analysis.issues.push({
-          type: 'warning',
-          title: 'Excessive combo classes',
-          desc: 'Too many combos may indicate over-specificity.'
+          title: 'No combo classes',
+          desc: 'Use combo classes for variations (.btn.is-primary)'
         });
       }
     }
 
     function analyzeVariables(styles, analysis) {
-      let varCount = 0;
-      let hardcodedColors = 0;
-      let hardcodedSizes = 0;
+      let varRefs = 0, hardColors = 0, hardSizes = 0;
 
-      const colorRegex = /#[0-9a-fA-F]{3,8}|rgba?\s*\([^)]+\)|hsla?\s*\([^)]+\)/gi;
-      const sizeRegex = /:\s*\d+px/g;
       const varRegex = /var\s*\(\s*--[^)]+\)/gi;
+      const colorRegex = /#[0-9a-fA-F]{3,8}(?![0-9a-fA-F])|rgba?\s*\([^)]+\)|hsla?\s*\([^)]+\)/gi;
+      const sizeRegex = /:\s*\d+px/g;
 
       styles.forEach(style => {
         const css = style.styleLess || '';
+        varRefs += (css.match(varRegex) || []).length;
         
-        const vars = css.match(varRegex) || [];
-        varCount += vars.length;
-
-        // Don't count colors that are inside var() references
-        const cssWithoutVars = css.replace(varRegex, '');
-        const colors = cssWithoutVars.match(colorRegex) || [];
-        hardcodedColors += colors.length;
-
-        const sizes = cssWithoutVars.match(sizeRegex) || [];
-        hardcodedSizes += sizes.length;
+        const cssNoVars = css.replace(varRegex, '');
+        hardColors += (cssNoVars.match(colorRegex) || []).length;
+        hardSizes += (cssNoVars.match(sizeRegex) || []).length;
       });
 
-      const total = varCount + hardcodedColors + hardcodedSizes || 1;
-      const varRatio = varCount / total;
+      let score = 15;
+      if (varRefs === 0 && styles.length > 5) score -= 10;
+      else if (varRefs < 5) score -= 5;
+      if (hardColors > 20) score -= 5;
+      else if (hardColors > 10) score -= 3;
 
-      let varScore = 0;
-      if (varCount > 10) varScore += 8;
-      else if (varCount > 5) varScore += 5;
-      else if (varCount > 0) varScore += 2;
-      
-      if (hardcodedColors < 5) varScore += 4;
-      else if (hardcodedColors < 15) varScore += 2;
-      
-      if (varRatio > 0.3) varScore += 3;
-
-      analysis.metrics.cssVariables.score = Math.min(15, varScore);
+      analysis.metrics.cssVariables.score = Math.max(0, Math.min(15, score));
       analysis.metrics.cssVariables.details = [
-        { text: `${varCount} CSS variable references`, type: varCount > 5 ? 'good' : varCount > 0 ? 'info' : 'warning' },
-        { text: `${hardcodedColors} hardcoded colors`, type: hardcodedColors > 15 ? 'issue' : hardcodedColors > 5 ? 'warning' : 'good' },
-        { text: `${hardcodedSizes} hardcoded px sizes`, type: hardcodedSizes > 30 ? 'warning' : 'info' }
+        { text: `${varRefs} variable references`, type: varRefs > 5 ? 'good' : varRefs > 0 ? 'info' : 'issue' },
+        { text: `${hardColors} hardcoded colors`, type: hardColors > 15 ? 'issue' : hardColors > 5 ? 'warning' : 'good' },
+        { text: `${hardSizes} hardcoded px values`, type: 'info' }
       ];
 
-      if (varCount === 0 && styles.length > 5) {
+      if (varRefs === 0 && styles.length > 10) {
         analysis.issues.push({
           type: 'critical',
-          title: 'No CSS variables detected',
-          desc: 'Use Webflow variables for colors, spacing, typography.'
-        });
-      }
-
-      if (hardcodedColors > 20) {
-        analysis.issues.push({
-          type: 'warning',
-          title: `${hardcodedColors} hardcoded colors`,
-          desc: 'Use Webflow color variables for consistency.'
+          title: 'No CSS variables',
+          desc: 'Use Webflow variables for colors and spacing.'
         });
       }
     }
 
-    function analyzeStructure(nodes, styles, analysis) {
+    function analyzeStructure(nodes, analysis) {
       let score = 20;
       const details = [];
 
-      // Check for deep nesting
-      const maxDepth = calculateMaxDepth(nodes);
+      // Nesting depth
+      const maxDepth = calcMaxDepth(nodes);
       if (maxDepth > 12) {
-        score -= 6;
+        score -= 8;
         details.push({ text: `Deep nesting: ${maxDepth} levels`, type: 'issue' });
-        analysis.issues.push({
-          type: 'warning',
-          title: `Deep nesting: ${maxDepth} levels`,
-          desc: 'Flatten structure for better performance.'
-        });
+        analysis.issues.push({ type: 'warning', title: `Nesting ${maxDepth} levels deep`, desc: 'Flatten your structure' });
       } else if (maxDepth > 8) {
-        score -= 2;
-        details.push({ text: `Nesting depth: ${maxDepth} levels`, type: 'warning' });
+        score -= 3;
+        details.push({ text: `Nesting: ${maxDepth} levels`, type: 'warning' });
       } else {
-        details.push({ text: `Nesting depth: ${maxDepth} levels`, type: 'good' });
+        details.push({ text: `Nesting: ${maxDepth} levels`, type: 'good' });
       }
 
-      // Check for div soup
-      const divCount = nodes.filter(n => n.tag === 'div' && n.type === 'Block').length;
-      const totalElements = nodes.length || 1;
-      const divRatio = divCount / totalElements;
-
+      // Div soup
+      const divs = nodes.filter(n => n.tag === 'div' && n.type === 'Block').length;
+      const divRatio = divs / (nodes.length || 1);
       if (divRatio > 0.85) {
-        score -= 5;
-        details.push({ text: `${Math.round(divRatio * 100)}% divs (div soup!)`, type: 'issue' });
-        analysis.issues.push({
-          type: 'warning',
-          title: 'Div soup detected',
-          desc: 'Use semantic HTML: section, article, nav, main, etc.'
-        });
+        score -= 7;
+        details.push({ text: `${Math.round(divRatio*100)}% divs (div soup!)`, type: 'issue' });
+        analysis.issues.push({ type: 'warning', title: 'Div soup', desc: 'Use semantic HTML elements' });
       } else if (divRatio > 0.7) {
-        score -= 2;
-        details.push({ text: `${Math.round(divRatio * 100)}% div elements`, type: 'warning' });
+        score -= 3;
+        details.push({ text: `${Math.round(divRatio*100)}% div elements`, type: 'warning' });
       } else {
-        details.push({ text: `${Math.round(divRatio * 100)}% div elements`, type: 'good' });
+        details.push({ text: `${Math.round(divRatio*100)}% div elements`, type: 'good' });
       }
 
-      // Check for semantic elements
-      const semanticTags = ['section', 'article', 'nav', 'header', 'footer', 'main', 'aside', 'figure'];
-      const semanticCount = nodes.filter(n => semanticTags.includes(n.tag)).length;
-      
-      if (semanticCount > 3) {
-        score += 2;
-        details.push({ text: `${semanticCount} semantic HTML elements`, type: 'good' });
-      } else if (semanticCount > 0) {
-        details.push({ text: `${semanticCount} semantic elements`, type: 'info' });
+      // Semantic elements
+      const semantic = nodes.filter(n => ['section','article','nav','header','footer','main','aside'].includes(n.tag)).length;
+      if (semantic > 3) {
+        details.push({ text: `${semantic} semantic elements`, type: 'good' });
+      } else if (semantic > 0) {
+        details.push({ text: `${semantic} semantic elements`, type: 'info' });
       } else if (nodes.length > 10) {
-        score -= 2;
-        details.push({ text: 'No semantic HTML elements', type: 'warning' });
-      }
-
-      // Check for accessibility attributes
-      const accessibleNodes = nodes.filter(n => {
-        const xattrs = n.data?.xattr || [];
-        return xattrs.some(attr => 
-          attr.name?.startsWith('aria-') || 
-          attr.name === 'role' ||
-          attr.name === 'tabindex'
-        );
-      });
-
-      if (accessibleNodes.length > 0) {
-        details.push({ text: `${accessibleNodes.length} elements with ARIA`, type: 'good' });
-      }
-
-      // Check for links and buttons
-      const interactiveElements = nodes.filter(n => 
-        n.type === 'Link' || 
-        n.tag === 'button' || 
-        n.tag === 'a'
-      ).length;
-      
-      if (interactiveElements > 0) {
-        details.push({ text: `${interactiveElements} interactive elements`, type: 'info' });
+        score -= 3;
+        details.push({ text: 'No semantic HTML', type: 'warning' });
       }
 
       analysis.metrics.structure.score = Math.max(0, Math.min(20, score));
       analysis.metrics.structure.details = details;
     }
 
-    function calculateMaxDepth(nodes) {
-      if (!nodes || nodes.length === 0) return 0;
+    function calcMaxDepth(nodes) {
+      if (!nodes?.length) return 0;
+      const map = {};
+      nodes.forEach(n => map[n._id] = n);
+      const roots = findRootNodes(nodes);
       
-      const nodeMap = {};
-      nodes.forEach(n => nodeMap[n._id] = n);
-      
-      const rootNodes = findRootNodes(nodes);
-      
-      function getDepth(node, current = 1) {
-        if (!node || !node.children || node.children.length === 0) return current;
-        
-        let maxChildDepth = current;
-        for (const childId of node.children) {
-          const child = nodeMap[childId];
-          if (child) {
-            const childDepth = getDepth(child, current + 1);
-            maxChildDepth = Math.max(maxChildDepth, childDepth);
-          }
-        }
-        return maxChildDepth;
+      function depth(node, d = 1) {
+        if (!node?.children?.length) return d;
+        return Math.max(...node.children.map(id => map[id] ? depth(map[id], d + 1) : d));
       }
-
-      if (rootNodes.length === 0) return 0;
-      return Math.max(...rootNodes.map(n => getDepth(n)));
+      
+      return roots.length ? Math.max(...roots.map(n => depth(n))) : 0;
     }
 
     function getGrade(score) {
       if (score >= 90) return 'A+';
       if (score >= 85) return 'A';
       if (score >= 80) return 'B+';
-      if (score >= 75) return 'B';
-      if (score >= 70) return 'C+';
-      if (score >= 65) return 'C';
-      if (score >= 55) return 'D';
+      if (score >= 70) return 'B';
+      if (score >= 60) return 'C';
+      if (score >= 50) return 'D';
       return 'F';
     }
 
     function getSummary(analysis) {
       const { score, frameworks } = analysis;
-      const fwNote = frameworks.length > 0 
-        ? ` Using ${frameworks[0].name} framework.` 
-        : ' No framework detected.';
+      const fw = frameworks.length ? ` Detected: ${frameworks[0].name}.` : ' No framework detected.';
       
-      if (score >= 90) {
-        return `Excellent! Well-structured and scalable.${fwNote}`;
-      } else if (score >= 80) {
-        return `Good structure with minor improvements possible.${fwNote}`;
-      } else if (score >= 70) {
-        return `Decent foundation, needs better organization.${fwNote}`;
-      } else if (score >= 60) {
-        return `Several areas need attention for scalability.${fwNote}`;
-      } else if (score >= 40) {
-        return `Significant issues. Consider adopting a framework.${fwNote}`;
-      } else {
-        return `Major restructuring needed for maintainability.${fwNote}`;
-      }
+      if (score >= 85) return `Excellent! Well-structured and scalable.${fw}`;
+      if (score >= 70) return `Good foundation with room for improvement.${fw}`;
+      if (score >= 55) return `Needs work on naming and organization.${fw}`;
+      if (score >= 40) return `Significant issues. Consider adopting a framework.${fw}`;
+      return `Major restructuring needed. This will be hard to maintain.${fw}`;
     }
 
-    function getScoreColor(score) {
-      if (score >= 80) return '#22c55e';
-      if (score >= 60) return '#fbbf24';
+    function getScoreColor(s) {
+      if (s >= 75) return '#22c55e';
+      if (s >= 50) return '#fbbf24';
       return '#ef4444';
     }
 
-    // ========== RENDER FUNCTIONS ==========
+    // ========== RENDER ==========
 
     function render() {
       if (!jsonData) {
@@ -1550,223 +1041,152 @@
 
       const { score, grade, summary, frameworks, metrics, issues } = healthAnalysis;
       const color = getScoreColor(score);
-      const circumference = 2 * Math.PI * 52;
-      const offset = circumference - (score / 100) * circumference;
+      const circ = 2 * Math.PI * 52;
+      const offset = circ - (score / 100) * circ;
 
-      let html = `
+      healthSection.innerHTML = `
         <div class="health-header">
           <div class="health-score-circle">
             <svg width="120" height="120">
               <circle class="bg" cx="60" cy="60" r="52"></circle>
-              <circle class="progress" cx="60" cy="60" r="52" 
-                stroke="${color}" 
-                stroke-dasharray="${circumference}" 
-                stroke-dashoffset="${offset}">
-              </circle>
+              <circle class="progress" cx="60" cy="60" r="52" stroke="${color}" stroke-dasharray="${circ}" stroke-dashoffset="${offset}"></circle>
             </svg>
             <div class="score-text">
-              <div class="score-value" style="color: ${color}">${score}</div>
+              <div class="score-value" style="color:${color}">${score}</div>
               <div class="score-label">Health</div>
             </div>
           </div>
           <div class="health-info">
             <h2>Project Health Score</h2>
-            <span class="grade" style="background: ${color}20; color: ${color}">Grade: ${grade}</span>
+            <span class="grade" style="background:${color}20;color:${color}">Grade: ${grade}</span>
             <p class="summary">${summary}</p>
           </div>
         </div>
-
         <div class="detected-frameworks">
-          ${frameworks.length > 0 
-            ? frameworks.map(f => `
-                <span class="framework-badge" title="${f.matchedPatterns?.join(', ') || ''}">
-                  ✓ ${f.name}
-                  <span style="opacity: 0.7; font-size: 11px;">(${f.matchCount} matches)</span>
-                </span>
-              `).join('')
-            : '<span class="framework-badge none">⚠ No framework detected</span>'
-          }
+          ${frameworks.length ? frameworks.map(f => `<span class="framework-badge">✓ ${f.name} <span style="opacity:0.7;font-size:11px">(${f.matchCount} matches)</span></span>`).join('') : '<span class="framework-badge none">⚠ No framework detected</span>'}
         </div>
-
         <div class="health-metrics">
-          ${Object.entries(metrics).map(([key, metric]) => {
-            const pct = Math.round((metric.score / metric.max) * 100);
-            const metricColor = pct >= 70 ? '#22c55e' : pct >= 40 ? '#fbbf24' : '#ef4444';
+          ${Object.entries(metrics).map(([key, m]) => {
+            const pct = Math.round((m.score / m.max) * 100);
+            const col = pct >= 70 ? '#22c55e' : pct >= 40 ? '#fbbf24' : '#ef4444';
             const titles = {
-              namingConvention: '📝 Naming Convention',
-              classReuse: '♻️ Class Reuse',
-              comboClasses: '🔗 Combo Classes',
-              cssVariables: '🎨 CSS Variables',
+              namingConvention: '📝 Naming',
+              classReuse: '♻️ Reuse',
+              comboClasses: '🔗 Combos',
+              cssVariables: '🎨 Variables',
               structure: '🏗️ Structure'
             };
-            
             return `
               <div class="metric-card">
                 <div class="metric-header">
-                  <span class="metric-title">${titles[key] || key}</span>
-                  <span class="metric-score ${pct >= 70 ? 'good' : pct >= 40 ? 'warning' : 'bad'}">
-                    ${metric.score}/${metric.max}
-                  </span>
+                  <span class="metric-title">${titles[key]}</span>
+                  <span class="metric-score ${pct >= 70 ? 'good' : pct >= 40 ? 'warning' : 'bad'}">${m.score}/${m.max}</span>
                 </div>
-                <div class="metric-bar">
-                  <div class="metric-bar-fill" style="width: ${pct}%; background: ${metricColor};"></div>
-                </div>
-                <div class="metric-details">
-                  <ul>
-                    ${metric.details.map(d => `<li class="${d.type || ''}">${d.text}</li>`).join('')}
-                  </ul>
-                </div>
+                <div class="metric-bar"><div class="metric-bar-fill" style="width:${pct}%;background:${col}"></div></div>
+                <div class="metric-details"><ul>${m.details.map(d => `<li class="${d.type}">${d.text}</li>`).join('')}</ul></div>
               </div>
             `;
           }).join('')}
         </div>
-
-        ${issues.length > 0 ? `
+        ${issues.length ? `
           <div class="issues-section">
             <div class="issues-header">
-              <h3>⚠️ Issues Found (${issues.length})</h3>
-              ${issues.length > 5 ? `
-                <button class="issues-toggle" onclick="toggleIssues()">
-                  ${showAllIssues ? 'Show Less' : 'Show All'}
-                </button>
-              ` : ''}
+              <h3>⚠️ Issues (${issues.length})</h3>
+              ${issues.length > 5 ? `<button class="issues-toggle" onclick="toggleIssues()">${showAllIssues ? 'Less' : 'All'}</button>` : ''}
             </div>
             <div class="issues-list">
-              ${(showAllIssues ? issues : issues.slice(0, 5)).map(issue => `
+              ${(showAllIssues ? issues : issues.slice(0, 5)).map(i => `
                 <div class="issue-item">
-                  <div class="issue-icon ${issue.type}">
-                    ${issue.type === 'critical' ? '!' : issue.type === 'warning' ? '⚠' : 'i'}
-                  </div>
+                  <div class="issue-icon ${i.type}">${i.type === 'critical' ? '!' : i.type === 'warning' ? '⚠' : 'i'}</div>
                   <div class="issue-content">
-                    <div class="issue-title">${escapeHtml(issue.title)}</div>
-                    <div class="issue-desc">${escapeHtml(issue.desc)}</div>
+                    <div class="issue-title">${esc(i.title)}</div>
+                    <div class="issue-desc">${esc(i.desc)}</div>
                   </div>
                 </div>
               `).join('')}
-              ${!showAllIssues && issues.length > 5 ? `
-                <div class="issue-item" style="opacity: 0.6; cursor: pointer;" onclick="toggleIssues()">
-                  <div class="issue-content">
-                    <div class="issue-title">+ ${issues.length - 5} more issues — click to expand</div>
-                  </div>
-                </div>
-              ` : ''}
+              ${!showAllIssues && issues.length > 5 ? `<div class="issue-item" style="opacity:0.6;cursor:pointer" onclick="toggleIssues()"><div class="issue-content"><div class="issue-title">+ ${issues.length - 5} more</div></div></div>` : ''}
             </div>
           </div>
-        ` : '<div style="margin-top: 16px; color: #22c55e;">✓ No major issues found</div>'}
+        ` : '<div style="margin-top:16px;color:#22c55e">✓ No major issues</div>'}
       `;
-
-      healthSection.innerHTML = html;
     }
 
-    window.toggleIssues = function() {
-      showAllIssues = !showAllIssues;
-      renderHealthScore();
-    };
+    window.toggleIssues = () => { showAllIssues = !showAllIssues; renderHealthScore(); };
 
     function renderStats() {
       const { nodes, styles, ix2 } = jsonData.payload || {};
-      const meta = jsonData.meta || {};
-
       document.getElementById('statElements').textContent = nodes?.length || 0;
       document.getElementById('statClasses').textContent = styles?.length || 0;
       document.getElementById('statInteractions').textContent = ix2?.interactions?.length || 0;
-      document.getElementById('statSymbols').textContent = meta.unlinkedSymbolCount || 0;
+      document.getElementById('statSymbols').textContent = jsonData.meta?.unlinkedSymbolCount || 0;
       document.getElementById('stylesCount').textContent = `(${styles?.length || 0})`;
     }
 
     function renderElementTypes() {
       const nodes = jsonData.payload?.nodes || [];
       const types = {};
-      nodes.forEach(n => {
-        types[n.type] = (types[n.type] || 0) + 1;
-      });
-
-      const container = document.getElementById('typeTags');
-      container.innerHTML = Object.entries(types)
+      nodes.forEach(n => types[n.type] = (types[n.type] || 0) + 1);
+      document.getElementById('typeTags').innerHTML = Object.entries(types)
         .sort((a, b) => b[1] - a[1])
-        .map(([type, count]) => `
-          <span class="type-tag">
-            <span class="name">${type}</span>
-            <span class="count">×${count}</span>
-          </span>
-        `).join('');
+        .map(([t, c]) => `<span class="type-tag"><span class="name">${t}</span><span class="count">×${c}</span></span>`)
+        .join('');
     }
 
-    function getStyleName(styleId) {
-      const styles = jsonData.payload?.styles || [];
-      const style = styles.find(s => s._id === styleId);
-      return style?.name || styleId.substring(0, 8);
-    }
-
-    function getNodeName(node) {
-      return node.meta?.displayName || node.data?.displayName || '';
+    function getStyleName(id) {
+      const s = (jsonData.payload?.styles || []).find(x => x._id === id);
+      return s?.name || id.slice(0, 8);
     }
 
     function getClassCategory(name) {
       if (!healthAnalysis) return '';
-      const { classBreakdown } = healthAnalysis;
-      if (classBreakdown.framework.includes(name)) return 'framework';
-      if (classBreakdown.utility.includes(name)) return 'utility';
-      if (classBreakdown.random.includes(name)) return 'random';
-      if (classBreakdown.combo.includes(name)) return 'combo';
+      const b = healthAnalysis.classBreakdown;
+      if (b.random.includes(name)) return 'random';
+      if (b.framework.includes(name)) return 'framework';
+      if (b.utility.includes(name)) return 'utility';
+      if (b.combo.includes(name)) return 'combo';
       return '';
     }
 
     function renderTree() {
       const nodes = jsonData.payload?.nodes || [];
-      const nodeMap = {};
-      nodes.forEach(n => nodeMap[n._id] = n);
+      const map = {};
+      nodes.forEach(n => map[n._id] = n);
+      const roots = findRootNodes(nodes);
 
-      const rootNodes = findRootNodes(nodes);
-
-      function renderNode(node, depth = 0) {
+      function rn(node) {
         const id = 'node-' + node._id;
-        const isExpanded = expandedNodes.has(id);
-        const hasChildren = node.children?.length > 0;
-        const displayName = getNodeName(node);
-        const classNames = (node.classes || []).map(c => getStyleName(c));
-
-        const matchesSearch = searchTerm && (
+        const exp = expandedNodes.has(id);
+        const hasKids = node.children?.length > 0;
+        const name = node.meta?.displayName || node.data?.displayName || '';
+        const classes = (node.classes || []).map(c => getStyleName(c));
+        const match = searchTerm && (
           node.type?.toLowerCase().includes(searchTerm) ||
           node.tag?.toLowerCase().includes(searchTerm) ||
-          displayName?.toLowerCase().includes(searchTerm) ||
-          classNames.some(c => c.toLowerCase().includes(searchTerm))
+          name?.toLowerCase().includes(searchTerm) ||
+          classes.some(c => c.toLowerCase().includes(searchTerm))
         );
 
-        let html = `
-          <div class="tree-node ${matchesSearch ? 'highlight' : ''}">
-            <div class="tree-node-header" data-node-id="${id}">
-              <span class="tree-toggle">${hasChildren ? (isExpanded ? '▼' : '▶') : ''}</span>
-              <span class="tree-tag">&lt;${node.tag || 'div'}&gt;</span>
-              <span class="tree-type">${node.type}</span>
-              ${displayName ? `<span class="tree-name">"${escapeHtml(displayName)}"</span>` : ''}
-              ${classNames.length > 0 ? `<span class="tree-classes">.${classNames.slice(0, 3).join(' .')}${classNames.length > 3 ? ' +' + (classNames.length - 3) : ''}</span>` : ''}
-            </div>
-        `;
-
-        if (isExpanded && hasChildren) {
-          html += '<div class="tree-children">';
-          node.children.forEach(childId => {
-            const child = nodeMap[childId];
-            if (child) html += renderNode(child, depth + 1);
-          });
-          html += '</div>';
+        let h = `<div class="tree-node ${match ? 'highlight' : ''}">
+          <div class="tree-node-header" data-node-id="${id}">
+            <span class="tree-toggle">${hasKids ? (exp ? '▼' : '▶') : ''}</span>
+            <span class="tree-tag">&lt;${node.tag || 'div'}&gt;</span>
+            <span class="tree-type">${node.type}</span>
+            ${name ? `<span class="tree-name">"${esc(name)}"</span>` : ''}
+            ${classes.length ? `<span class="tree-classes">.${classes.slice(0, 3).join(' .')}${classes.length > 3 ? ' +' + (classes.length - 3) : ''}</span>` : ''}
+          </div>`;
+        if (exp && hasKids) {
+          h += '<div class="tree-children">';
+          node.children.forEach(cid => { if (map[cid]) h += rn(map[cid]); });
+          h += '</div>';
         }
-
-        html += '</div>';
-        return html;
+        return h + '</div>';
       }
 
-      treeContent.innerHTML = rootNodes.map(n => renderNode(n)).join('');
-
+      treeContent.innerHTML = roots.map(n => rn(n)).join('');
       treeContent.querySelectorAll('.tree-node-header').forEach(el => {
         el.addEventListener('click', () => {
           const id = el.dataset.nodeId;
-          if (expandedNodes.has(id)) {
-            expandedNodes.delete(id);
-          } else {
-            expandedNodes.add(id);
-          }
+          expandedNodes.has(id) ? expandedNodes.delete(id) : expandedNodes.add(id);
           renderTree();
         });
       });
@@ -1774,105 +1194,74 @@
 
     function renderStyles() {
       const styles = jsonData.payload?.styles || [];
-      
-      const filteredStyles = searchTerm
-        ? styles.filter(s => s.name?.toLowerCase().includes(searchTerm))
-        : styles;
+      const filtered = searchTerm ? styles.filter(s => s.name?.toLowerCase().includes(searchTerm)) : styles;
 
-      stylesContent.innerHTML = filteredStyles.map(style => {
-        const id = 'style-' + style._id;
-        const isExpanded = expandedNodes.has(id);
-        const variantCount = style.variants ? Object.keys(style.variants).length : 0;
-        const category = getClassCategory(style.name);
+      stylesContent.innerHTML = filtered.map(s => {
+        const id = 'style-' + s._id;
+        const exp = expandedNodes.has(id);
+        const vars = s.variants ? Object.keys(s.variants).length : 0;
+        const cat = getClassCategory(s.name);
 
-        let html = `
-          <div class="style-item">
-            <div class="style-header" data-style-id="${id}">
-              <span class="tree-toggle">${isExpanded ? '▼' : '▶'}</span>
-              <span class="style-name">.${escapeHtml(style.name || '(unnamed)')}</span>
-              ${style.comb === '&' ? '<span class="style-badge">combo</span>' : ''}
-              ${category === 'framework' ? '<span class="style-badge framework">framework</span>' : ''}
-              ${category === 'utility' ? '<span class="style-badge utility">utility</span>' : ''}
-              ${category === 'random' ? '<span class="style-badge random">random</span>' : ''}
-              ${variantCount > 0 ? `<span class="style-variants">${variantCount} variants</span>` : ''}
-            </div>
-        `;
+        let h = `<div class="style-item">
+          <div class="style-header" data-style-id="${id}">
+            <span class="tree-toggle">${exp ? '▼' : '▶'}</span>
+            <span class="style-name">.${esc(s.name || '(unnamed)')}</span>
+            ${s.comb === '&' ? '<span class="style-badge">combo</span>' : ''}
+            ${cat === 'framework' ? '<span class="style-badge framework">framework</span>' : ''}
+            ${cat === 'utility' ? '<span class="style-badge utility">utility</span>' : ''}
+            ${cat === 'random' ? '<span class="style-badge random">random</span>' : ''}
+            ${vars > 0 ? `<span class="style-variants">${vars} variants</span>` : ''}
+          </div>`;
 
-        if (isExpanded) {
-          const cssFormatted = style.styleLess
-            ? style.styleLess.split(';').filter(Boolean).map(s => s.trim()).join(';\n')
-            : '';
-
-          html += `
-            <div class="style-details">
-              <div class="style-id">ID: ${style._id}</div>
-              ${cssFormatted ? `<div class="style-css">${escapeHtml(cssFormatted)}</div>` : ''}
-          `;
-
-          if (variantCount > 0) {
-            html += '<div class="variant-section"><div class="variant-label">Variants:</div>';
-            Object.entries(style.variants).forEach(([name, data]) => {
-              const variantCss = data.styleLess
-                ? data.styleLess.split(';').filter(Boolean).map(s => s.trim()).join(';\n')
-                : '';
-              html += `
-                <div style="margin: 8px 0;">
-                  <span class="variant-name">${escapeHtml(name)}:</span>
-                  ${variantCss ? `<div class="style-css">${escapeHtml(variantCss)}</div>` : ''}
-                </div>
-              `;
+        if (exp) {
+          const css = s.styleLess ? s.styleLess.split(';').filter(Boolean).map(x => x.trim()).join(';\n') : '';
+          h += `<div class="style-details">
+            <div class="style-id">ID: ${s._id}</div>
+            ${css ? `<div class="style-css">${esc(css)}</div>` : ''}`;
+          if (vars > 0) {
+            h += '<div class="variant-section"><div class="variant-label">Variants:</div>';
+            Object.entries(s.variants).forEach(([vn, vd]) => {
+              const vc = vd.styleLess ? vd.styleLess.split(';').filter(Boolean).map(x => x.trim()).join(';\n') : '';
+              h += `<div style="margin:8px 0"><span class="variant-name">${esc(vn)}:</span>${vc ? `<div class="style-css">${esc(vc)}</div>` : ''}</div>`;
             });
-            html += '</div>';
+            h += '</div>';
           }
-
-          html += '</div>';
+          h += '</div>';
         }
-
-        html += '</div>';
-        return html;
+        return h + '</div>';
       }).join('');
 
       stylesContent.querySelectorAll('.style-header').forEach(el => {
         el.addEventListener('click', () => {
           const id = el.dataset.styleId;
-          if (expandedNodes.has(id)) {
-            expandedNodes.delete(id);
-          } else {
-            expandedNodes.add(id);
-          }
+          expandedNodes.has(id) ? expandedNodes.delete(id) : expandedNodes.add(id);
           renderStyles();
         });
       });
     }
 
     function renderRaw() {
-      rawContent.innerHTML = `<pre class="raw-json">${escapeHtml(JSON.stringify(jsonData, null, 2))}</pre>`;
+      rawContent.innerHTML = `<pre class="raw-json">${esc(JSON.stringify(jsonData, null, 2))}</pre>`;
     }
 
-    function escapeHtml(text) {
-      if (!text) return '';
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
+    function esc(t) {
+      if (!t) return '';
+      const d = document.createElement('div');
+      d.textContent = t;
+      return d.innerHTML;
     }
 
     function switchTab(tab) {
       activeTab = tab;
-      document.querySelectorAll('.tab').forEach(t => {
-        t.classList.toggle('active', t.dataset.tab === tab);
-      });
+      document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
       treeContent.classList.toggle('hidden', tab !== 'tree');
       stylesContent.classList.toggle('hidden', tab !== 'styles');
       rawContent.classList.toggle('hidden', tab !== 'raw');
     }
 
     function expandAll() {
-      const nodes = jsonData.payload?.nodes || [];
-      const styles = jsonData.payload?.styles || [];
-      
-      nodes.forEach(n => expandedNodes.add('node-' + n._id));
-      styles.forEach(s => expandedNodes.add('style-' + s._id));
-      
+      (jsonData.payload?.nodes || []).forEach(n => expandedNodes.add('node-' + n._id));
+      (jsonData.payload?.styles || []).forEach(s => expandedNodes.add('style-' + s._id));
       render();
     }
 
